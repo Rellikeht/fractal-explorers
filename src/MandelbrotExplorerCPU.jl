@@ -1,40 +1,8 @@
-using GLMakie
-using Colors
-using Base.Threads
-
-module MandelbrotExplorer
-
-using GLMakie
-using Colors
-using Base.Threads
-
-#= settings {{{=#
-
-GLMakie.activate!(; framerate=60)
-
-function def_hsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
-    if iters == maxiter
-        return RGBf(0, 0, 0)
-    end
-    return HSV(360 * iters / maxiter, 0.8, 1.0)
-end
-
-const DEFAULT_COLOR_MAP = def_hsv
-const DEFAULT_VIEW_SIZE = (1920, 1080)
-const DEFAULT_MAXITER = 100
-const DEFAULT_CENTER = 0.0 + 0im
-const DEFAULT_PLANE_SIZE = (1.6, 0.9) .* 2
-const DEFAULT_ZOOM_FACTOR = 1.1
-
-const ZOOM_ACTION = :scrollzoom
-const DRAG_ACTION = :dragmove
-const RESET_ACTION = :reset
-
-#= }}}=#
+# module MandelbrotExplorerCPU
 
 #= basics {{{=#
 
-mutable struct Mandelbrot{
+mutable struct MandelbrotCPU{
     F<:Function,
     C<:Color,
     I<:Integer,
@@ -52,14 +20,14 @@ mutable struct Mandelbrot{
     zoom_factor::R2
 end
 
-function Mandelbrot(;
+function MandelbrotCPU(;
     view_size::Tuple{S,S}=DEFAULT_VIEW_SIZE,
     maxiter::I=DEFAULT_MAXITER,
     center::Complex{R1}=DEFAULT_CENTER,
     plane_size::Tuple{R3,R3}=DEFAULT_PLANE_SIZE,
     color_map::F=DEFAULT_COLOR_MAP,
     zoom_factor::R2=DEFAULT_ZOOM_FACTOR,
-)::Mandelbrot where {
+)::MandelbrotCPU where {
     F<:Function,
     S<:Integer,
     I<:Integer,
@@ -69,7 +37,7 @@ function Mandelbrot(;
 }
     img = Observable(fill(RGBf(0, 0, 0), view_size))
     println(typeof(img))
-    return Mandelbrot(
+    return MandelbrotCPU(
         color_map,
         img,
         # view_size,
@@ -83,7 +51,7 @@ end
 
 function mandelbrot!(
     ax::Axis,
-    m::Mandelbrot,
+    m::MandelbrotCPU,
     static::Bool=false
 )
     image!(ax, m.img)
@@ -112,7 +80,7 @@ end
 macro par_m(func)
     result = esc(:(
         function $(func.args[1].args[1])(
-            $(func.args[1].args[2].args[1])::$Mandelbrot{F,C,I,R1,R2}
+            $(func.args[1].args[2].args[1])::$MandelbrotCPU{F,C,I,R1,R2}
         ) where {
             F<:Function,
             C<:Color,
@@ -130,7 +98,7 @@ end
 
 #= env setup {{{=#
 
-function simple_setup(m::Mandelbrot)::Tuple{Figure,Axis}
+function simple_setup(m::MandelbrotCPU)::Tuple{Figure,Axis}
     f = Figure(
         size=size(m.img[]),
         figure_padding=0,
@@ -147,18 +115,18 @@ end
 
 #= actions {{{=#
 
-function reset!(m::Mandelbrot)
+function reset!(m::MandelbrotCPU)
     m.center = DEFAULT_CENTER
     m.plane_size = DEFAULT_PLANE_SIZE
     update!(m)
 end
 
-function zoom!(m::Mandelbrot)
+function zoom!(m::MandelbrotCPU)
     (event::ScrollEvent, axis::Axis) -> zoom!(m, event, axis)
 end
 
 function zoom!(
-    m::Mandelbrot,
+    m::MandelbrotCPU,
     event::ScrollEvent,
     _::Axis,
 )
@@ -169,12 +137,12 @@ function zoom!(
     update!(m)
 end
 
-function move!(m::Mandelbrot)
+function move!(m::MandelbrotCPU)
     (event::MouseEvent, axis::Axis) -> move!(m, event, axis)
 end
 
 function move!(
-    m::Mandelbrot,
+    m::MandelbrotCPU,
     event::MouseEvent,
     _::Axis,
 )
@@ -231,7 +199,7 @@ function calc_point(
     return maxiter
 end
 
-@par_m function update!(m::Mandelbrot)
+@par_m function update!(m::MandelbrotCPU)
     asize = R1.(size(m.img[]))
     @time @threads for i in axes(m.img[], 2)
         # @time for i in axes(m.img[], 2)
@@ -251,4 +219,4 @@ end
 
 #= }}}=#
 
-end
+# end
