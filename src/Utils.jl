@@ -1,5 +1,7 @@
 module Utils
 
+#= import/export {{{=#
+
 export AbstractFractal,
     def_hsv,
     black_white,
@@ -17,7 +19,9 @@ export AbstractFractal,
 using Colors
 using GLMakie
 
-abstract type AbstractFractal end
+#= }}}=#
+
+#= colors {{{=#
 
 function def_hsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
     if iters == maxiter
@@ -34,6 +38,12 @@ function black_white(iters::I, maxiter::I)::RGBf where {I<:Integer}
     return RGBf(v, v, v)
 end
 
+#= }}}=#
+
+#= setup {{{=#
+
+abstract type AbstractFractal end
+
 const DEFAULT_COLOR_MAP = def_hsv
 const DEFAULT_VIEW_SIZE = (1920, 1080)
 const DEFAULT_MAXITER = 100
@@ -44,6 +54,10 @@ const DEFAULT_ZOOM_FACTOR = 1.1
 const ZOOM_ACTION = :scrollzoom
 const DRAG_ACTION = :dragmove
 const RESET_ACTION = :reset
+
+#= }}}=#
+
+#= env setup {{{=#
 
 function fractal!(
     ax::Axis,
@@ -69,8 +83,6 @@ function fractal!(
     end
     update!(fractal)
 end
-
-#= env setup {{{=#
 
 function simple_setup(fractal::AbstractFractal)::Tuple{Figure,Axis}
     f = Figure(

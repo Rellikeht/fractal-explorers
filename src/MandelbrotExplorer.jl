@@ -1,12 +1,12 @@
 module MandelbrotExplorer
 
+#= basics {{{=#
+
 using ..Utils
 using GLMakie
 using Colors
 import Base.Threads: @threads
 GLMakie.activate!(; framerate=60)
-
-#= basics {{{=#
 
 mutable struct Mandelbrot{
     F<:Function,
@@ -55,6 +55,10 @@ function Mandelbrot(;
     )
 end
 
+#= }}}=#
+
+#= calculation {{{=#
+
 # changes mandelbrot object given as first parameter in function given 
 # as argument from ::Mandelbrot to ::Mandelbrot{F,C,I,R1,R2} with
 # proper type parametrization
@@ -74,10 +78,6 @@ macro par_m(func)
     ))
     return result
 end
-
-#= }}}=#
-
-#= calculation {{{=#
 
 # z = z^2 + c
 # x+yi = x^2 - y^2 +2xyi + cx + cyi

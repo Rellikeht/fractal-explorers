@@ -1,12 +1,12 @@
 # module MandelbrotExplorerCPU
 
+#= setup {{{=#
+
 using .Utils
 using GLMakie
 using Colors
 import Base.Threads: @threads
 GLMakie.activate!(; framerate=60)
-
-#= basics {{{=#
 
 mutable struct MandelbrotCPU{
     F<:Function,
@@ -55,30 +55,9 @@ function MandelbrotCPU(;
     )
 end
 
-function mandelbrot!(
-    ax::Axis,
-    m::MandelbrotCPU,
-    static::Bool=false
-)
-    image!(ax, m.img)
-    try
-        deregister_interaction!(ax, :scrollzoom)
-        deregister_interaction!(ax, :dragpan)
-        deregister_interaction!(ax, :rectanglezoom)
-        deregister_interaction!(ax, :limitreset)
-    catch
-    end
-    try
-        deregister_interaction!(ax, ZOOM_ACTION)
-        deregister_interaction!(ax, DRAG_ACTION)
-    catch
-    end
-    if !static
-        register_interaction!(zoom!(m), ax, ZOOM_ACTION)
-        register_interaction!(move!(m), ax, DRAG_ACTION)
-    end
-    update!(m)
-end
+#= }}}=#
+
+#= calculation {{{=#
 
 # changes mandelbrot object given as first parameter in function given 
 # as argument from ::Mandelbrot to ::Mandelbrot{F,C,I,R1,R2} with
@@ -99,80 +78,6 @@ macro par_m(func)
     ))
     return result
 end
-
-#= }}}=#
-
-#= env setup {{{=#
-
-function simple_setup(m::MandelbrotCPU)::Tuple{Figure,Axis}
-    f = Figure(
-        size=size(m.img[]),
-        figure_padding=0,
-        viewmode=:fitzoom, # no margin around axis
-    )
-    ax = Axis(f[1, 1])
-    hidespines!(ax)
-    hidedecorations!(ax)
-    tight_ticklabel_spacing!(ax) # no idea if needed
-    return (f, ax)
-end
-
-#= }}}=#
-
-#= actions {{{=#
-
-function reset!(m::MandelbrotCPU)
-    m.center = DEFAULT_CENTER
-    m.plane_size = DEFAULT_PLANE_SIZE
-    update!(m)
-end
-
-function zoom!(m::MandelbrotCPU)
-    (event::ScrollEvent, axis::Axis) -> zoom!(m, event, axis)
-end
-
-function zoom!(
-    m::MandelbrotCPU,
-    event::ScrollEvent,
-    _::Axis,
-)
-    if event.y == 0
-        return
-    end
-    m.plane_size = m.plane_size .* m.zoom_factor^(-event.y)
-    update!(m)
-end
-
-function move!(m::MandelbrotCPU)
-    (event::MouseEvent, axis::Axis) -> move!(m, event, axis)
-end
-
-function move!(
-    m::MandelbrotCPU,
-    event::MouseEvent,
-    _::Axis,
-)
-    if event.type == MouseEventTypes.leftdragstart ||
-       event.type == MouseEventTypes.leftdrag ||
-       event.type == MouseEventTypes.leftdragstop
-        # TODO size of axis, not image
-        px_unit = m.plane_size ./ size(m.img[])
-        dpx = event.prev_px .- event.px
-        d = (dpx[1], dpx[2])
-        m.drag_distance = m.drag_distance .- px_unit .* d
-        if event.type == MouseEventTypes.leftdragstop
-            m.center =
-                (m.center.re + m.drag_distance[1]) +
-                (m.center.im + m.drag_distance[2])im
-            m.drag_distance = (0, 0)
-            update!(m)
-        end
-    end
-end
-
-#= }}}=#
-
-#= calculation {{{=#
 
 # z = z^2 + c
 # x+yi = x^2 - y^2 +2xyi + cx + cyi
