@@ -1,0 +1,11 @@
+name = "FractalExplorersCuda"
+uuid = "cd59c4ed-ca22-4bc3-b3bf-72ee1d60c433"
+authors = ["Rellikeht <michaelhemperek@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+FractalExplorers = "0efb003e-6926-422e-a0b8-b954174e6c0b"
+
+[compat]
+CUDA = "5.8.2"
