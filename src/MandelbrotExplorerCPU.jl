@@ -1,5 +1,11 @@
 # module MandelbrotExplorerCPU
 
+using .Utils
+using GLMakie
+using Colors
+import Base.Threads: @threads
+GLMakie.activate!(; framerate=60)
+
 #= basics {{{=#
 
 mutable struct MandelbrotCPU{
@@ -9,7 +15,7 @@ mutable struct MandelbrotCPU{
     R1<:Real,
     R2<:Real,
     # S<:Integer,
-}
+} <: AbstractFractal
     color_map::F
     img::Observable{Matrix{C}}
     # view_size::Tuple{S,S}

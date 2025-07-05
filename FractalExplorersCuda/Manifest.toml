@@ -2,7 +2,7 @@
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "d62861212f16aa85a7e32ed10d46f2157a0b3b11"
+project_hash = "c5414001578655b611375bf2f844d031b71d7d30"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -491,17 +491,9 @@ uuid = "1fa38f19-a742-5d3f-a2b9-30dd87b9d5f8"
 version = "1.3.7"
 
 [[deps.FractalExplorers]]
-deps = ["BenchmarkTools", "CairoMakie", "Colors", "DaemonMode", "FractalExplorersCuda", "GLMakie", "Revise"]
-git-tree-sha1 = "31555a78c33101701d68d5a56c13dd74ef2183f3"
-repo-rev = "subpackages-layout"
-repo-url = "../.."
+deps = ["BenchmarkTools", "CairoMakie", "Colors", "DaemonMode", "GLMakie", "Revise"]
+path = ".."
 uuid = "0efb003e-6926-422e-a0b8-b954174e6c0b"
-version = "0.1.0"
-
-[[deps.FractalExplorersCuda]]
-deps = ["CUDA", "FractalExplorers"]
-path = "/home/michal/gits/projects/fractal-explorers/src/FractalExplorersCuda"
-uuid = "cd59c4ed-ca22-4bc3-b3bf-72ee1d60c433"
 version = "0.1.0"
 
 [[deps.FreeType]]

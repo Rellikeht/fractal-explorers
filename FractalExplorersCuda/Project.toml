@@ -9,4 +9,3 @@ FractalExplorers = "0efb003e-6926-422e-a0b8-b954174e6c0b"
 
 [compat]
 CUDA = "5.8.2"
-FractalExplorers = "0.1.0"
