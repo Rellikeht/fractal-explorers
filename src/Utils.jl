@@ -1,5 +1,3 @@
-module Utils
-
 #= import/export {{{=#
 
 export AbstractFractal,
@@ -11,10 +9,8 @@ export AbstractFractal,
     DEFAULT_CENTER,
     DEFAULT_PLANE_SIZE,
     DEFAULT_ZOOM_FACTOR,
-    fractal!
-    # move!,
-    # zoom!,
-    # reset!,
+    fractal!,
+    simple_setup
 
 using Colors
 using GLMakie
@@ -101,11 +97,12 @@ end
 
 #= actions {{{=#
 
-function reset!(fractal::AbstractFractal)
-    fractal.center = DEFAULT_CENTER
-    fractal.plane_size = DEFAULT_PLANE_SIZE
-    update!(fractal)
-end
+# TODO reset without changing fractal structure
+# function reset!(fractal::AbstractFractal)
+#     fractal.center = DEFAULT_CENTER
+#     fractal.plane_size = DEFAULT_PLANE_SIZE
+#     update!(fractal)
+# end
 
 function zoom!(m::AbstractFractal)
     (event::ScrollEvent, axis::Axis) -> zoom!(m, event, axis)
@@ -151,5 +148,3 @@ function move!(
 end
 
 #= }}}=#
-
-end

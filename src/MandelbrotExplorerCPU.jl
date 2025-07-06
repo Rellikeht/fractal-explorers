@@ -1,12 +1,17 @@
-# module MandelbrotExplorerCPU
+#= import/export {{{=#
 
-#= setup {{{=#
-
-using .Utils
 using GLMakie
 using Colors
 import Base.Threads: @threads
 GLMakie.activate!(; framerate=60)
+
+export MandelbrotCPU,
+    update!,
+    calc_point
+
+#= }}}=#
+
+#= setup {{{=#
 
 mutable struct MandelbrotCPU{
     F<:Function,
@@ -14,11 +19,9 @@ mutable struct MandelbrotCPU{
     I<:Integer,
     R1<:Real,
     R2<:Real,
-    # S<:Integer,
 } <: AbstractFractal
     color_map::F
     img::Observable{Matrix{C}}
-    # view_size::Tuple{S,S}
     maxiter::I
     center::Complex{R1}
     plane_size::Tuple{R1,R1}
@@ -42,11 +45,9 @@ function MandelbrotCPU(;
     R3<:Real,
 }
     img = Observable(fill(RGBf(0, 0, 0), view_size))
-    println(typeof(img))
     return MandelbrotCPU(
         color_map,
         img,
-        # view_size,
         maxiter,
         center,
         Tuple{R1,R1}(plane_size),
@@ -58,26 +59,6 @@ end
 #= }}}=#
 
 #= calculation {{{=#
-
-# changes mandelbrot object given as first parameter in function given 
-# as argument from ::Mandelbrot to ::Mandelbrot{F,C,I,R1,R2} with
-# proper type parametrization
-macro par_m(func)
-    result = esc(:(
-        function $(func.args[1].args[1])(
-            $(func.args[1].args[2].args[1])::$MandelbrotCPU{F,C,I,R1,R2}
-        ) where {
-            F<:Function,
-            C<:Color,
-            I<:Integer,
-            R1<:Real,
-            R2<:Real,
-        }
-            $(func.args[2])
-        end
-    ))
-    return result
-end
 
 # z = z^2 + c
 # x+yi = x^2 - y^2 +2xyi + cx + cyi
@@ -110,10 +91,9 @@ function calc_point(
     return maxiter
 end
 
-@par_m function update!(m::MandelbrotCPU)
+function update!(m::MandelbrotCPU{F,C,I,R1,R2}) where {F,C,I,R1,R2}
     asize = R1.(size(m.img[]))
-    @time @threads for i in axes(m.img[], 2)
-        # @time for i in axes(m.img[], 2)
+    @threads for i in axes(m.img[], 2)
         for j in axes(m.img[], 1)
             point = Complex{R1}(
                 -m.center.re + m.plane_size[1] * (j / asize[1] - R1(1 / 2)),
@@ -129,5 +109,3 @@ end
 end
 
 #= }}}=#
-
-# end
