@@ -119,7 +119,6 @@ function color!(
     iters_buffer::Matrix{I},
     maxiter::I
 ) where {F,I<:Integer}
-    # broadcast!(color_map, img, iters_buffer, maxiter)
     @threads for i in eachindex(iters_buffer)
         @inbounds img[i] = color_map(iters_buffer[i], maxiter)
     end

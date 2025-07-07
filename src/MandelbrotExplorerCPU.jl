@@ -60,30 +60,13 @@ end
 
 #= calculation {{{=#
 
-# z = z^2 + c
-# x+yi = x^2 - y^2 +2xyi + cx + cyi
-# x = x^2 - y^2 + cx
-# y = (2xy + cy)i
-# |z| >= 4
-# x^2 + y+2 >= 4
-
-# doesn't help
-# xs, ys = point.re * point.re, point.im * point.im
-# if xs + ys >= 4
-#     return i
-# end
-# point = Complex(
-#     xs - ys + start_point.re,
-#     2 * point.re * point.im + start_point.im
-# )
-
 function calc_point(
     start_point::Complex{R},
     maxiter::I
 )::I where {R<:Real,I<:Integer}
     point = start_point
     for i in 0:maxiter-1
-        if point.re * point.re + point.im * point.im >= 4
+        if point.re * point.re + point.im * point.im >= R(4)
             return i
         end
         point = point * point + start_point

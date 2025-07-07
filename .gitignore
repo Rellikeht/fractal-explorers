@@ -30,6 +30,7 @@ JuliaLocalPreferences.toml
 *.swp
 *.swo
 *.bck
+bck.*
 bck/
 .direnv/
 *local
