@@ -7,6 +7,7 @@ GLMakie.activate!(; framerate=60)
 
 export Mandelbrot,
     update!,
+    prepare!,
     calc_point
 
 #= }}}=#
@@ -21,6 +22,7 @@ mutable struct Mandelbrot{
     R2<:Real,
     B1<:AbstractMatrix{Complex{R1}},
     B2<:AbstractMatrix{I},
+    B3<:AbstractMatrix{I},
 } <: AbstractFractal
     color_map::F
     img::Observable{Matrix{C}}
@@ -29,8 +31,9 @@ mutable struct Mandelbrot{
     plane_size::Tuple{R1,R1}
     drag_distance::Tuple{R2,R2}
     zoom_factor::R2
-    buffer_in::B1
-    buffer_out::B2
+    coords_buffer::B1
+    iters_in_buffer::B2
+    iters_out_buffer::B3
 end
 
 function Mandelbrot(;
@@ -40,7 +43,7 @@ function Mandelbrot(;
     plane_size::Tuple{R3,R3}=DEFAULT_PLANE_SIZE,
     color_map::F=DEFAULT_COLOR_MAP,
     zoom_factor::R2=DEFAULT_ZOOM_FACTOR,
-    buffer_in::Union{B,Nothing}=nothing,
+    coords_buffer::Union{B,Nothing}=nothing,
 )::Mandelbrot where {
     F<:Function,
     S<:Integer,
@@ -48,12 +51,13 @@ function Mandelbrot(;
     R1<:Real,
     R2<:Real,
     R3<:Real,
-    B<:AbstractMatrix{<:Complex{R1}},
+    B<:AbstractMatrix{Complex{R1}},
 }
     img = Observable(fill(RGBf(0, 0, 0), view_size))
-    if buffer_in === nothing
-        buffer_in = Matrix{Complex{R1}}(undef, view_size)
+    if coords_buffer === nothing
+        coords_buffer = Matrix{Complex{R1}}(undef, view_size)
     end
+    iters_buffer = zeros(I, view_size)
     return Mandelbrot(
         color_map,
         img,
@@ -62,8 +66,9 @@ function Mandelbrot(;
         Tuple{R1,R1}(plane_size),
         (R2(0.0), R2(0.0)),
         R2(zoom_factor),
-        buffer_in,
-        zeros(I, view_size)
+        coords_buffer,
+        iters_buffer,
+        iters_buffer
     )
 end
 
@@ -71,32 +76,60 @@ end
 
 #= calculation {{{=#
 
+function prepare!(
+    coords_buffer::Matrix{Complex{R1}},
+    asize::Tuple{R1,R1},
+    center::Complex{R1},
+    plane_size::Tuple{R2,R2}
+) where {R1<:Real,R2<:Real}
+    bsize = size(coords_buffer)
+    # just in case linear version
+    # @threads for k in eachindex(coords_buffer)
+    #     i, j = divrem(k - 1, bsize[1]) .+ 1
+    #     @inbounds coords_buffer[j, i] = Complex{R1}(
+    #         -center.re + plane_size[1] * (j / asize[1] - R1(1 / 2)),
+    #         center.im + plane_size[2] * (-i / asize[2] + R1(1 / 2))
+    #     )
+    # end
+    @threads for i in axes(coords_buffer, 1)
+        for j in axes(coords_buffer, 2)
+            @inbounds coords_buffer[j, i] = Complex{R1}(
+                -center.re + plane_size[1] * (j / asize[1] - R1(1 / 2)),
+                center.im + plane_size[2] * (-i / asize[2] + R1(1 / 2))
+            )
+        end
+    end
+end
+
 # By default uses calc_point from CPU
 function update!(
-    buffer_in::Matrix{Complex{R}},
-    buffer_out::Matrix{I},
+    coords_buffer::Matrix{Complex{R}},
+    iters_in_buffer::Matrix{I},
+    _::Matrix{I},
     maxiter::I
 ) where {R<:Real,I<:Integer}
-    @threads for i in eachindex(buffer_in)
-        @inbounds buffer_out[i] = calc_point(buffer_in[i], maxiter)
+    @threads for i in eachindex(coords_buffer)
+        @inbounds iters_in_buffer[i] = calc_point(coords_buffer[i], maxiter)
+    end
+end
+
+function color!(
+    color_map::F,
+    img::Matrix{RGBf},
+    iters_buffer::Matrix{I},
+    maxiter::I
+) where {F,I<:Integer}
+    # broadcast!(color_map, img, iters_buffer, maxiter)
+    @threads for i in eachindex(iters_buffer)
+        @inbounds img[i] = color_map(iters_buffer[i], maxiter)
     end
 end
 
 function update!(m::Mandelbrot{F,C,I,R1,R2,B1,B2}) where {F,C,I,R1,R2,B1,B2}
-    asize = R1.(size(m.img[]))
-    @threads for i in axes(m.img[], 2)
-        for j in axes(m.img[], 1)
-            @inbounds m.buffer_in[j, i] = Complex{R1}(
-                -m.center.re + m.plane_size[1] * (j / asize[1] - R1(1 / 2)),
-                m.center.im + m.plane_size[2] * (-i / asize[2] + R1(1 / 2))
-            )
-        end
-    end
-    update!(m.buffer_in, m.buffer_out, m.maxiter)
-    @threads for i in eachindex(m.buffer_out)
-        @inbounds m.img[][i] = m.color_map(m.buffer_out[i], m.maxiter)
-    end
-    # this triggers update
+    prepare!(m.coords_buffer, R1.(size(m.img[])), m.center, m.plane_size)
+    update!(m.coords_buffer, m.iters_in_buffer, m.iters_out_buffer, m.maxiter)
+    color!(m.color_map, m.img[], m.iters_out_buffer, m.maxiter)
+    # trigger update
     m.img[] = m.img[]
     nothing
 end
