@@ -14,13 +14,12 @@ export MandelbrotCPU,
 #= setup {{{=#
 
 mutable struct MandelbrotCPU{
-    F<:Function,
     C<:Color,
     I<:Integer,
     R1<:Real,
     R2<:Real,
 } <: AbstractFractal
-    color_map::F
+    color_map::F where {F<:Function}
     img::Observable{Matrix{C}}
     maxiter::I
     center::Complex{R1}
@@ -34,10 +33,9 @@ function MandelbrotCPU(;
     maxiter::I=DEFAULT_MAXITER,
     center::Complex{R1}=DEFAULT_CENTER,
     plane_size::Tuple{R3,R3}=DEFAULT_PLANE_SIZE,
-    color_map::F=DEFAULT_COLOR_MAP,
+    color_map::F where {F<:Function}=DEFAULT_COLOR_MAP,
     zoom_factor::R2=DEFAULT_ZOOM_FACTOR,
 )::MandelbrotCPU where {
-    F<:Function,
     S<:Integer,
     I<:Integer,
     R1<:Real,
@@ -74,7 +72,7 @@ function calc_point(
     return maxiter
 end
 
-function update!(m::MandelbrotCPU{F,C,I,R1,R2}) where {F,C,I,R1,R2}
+function update!(m::MandelbrotCPU{C,I,R1,R2}) where {C,I,R1,R2}
     asize = R1.(size(m.img[]))
     @threads for i in axes(m.img[], 2)
         for j in axes(m.img[], 1)

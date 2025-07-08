@@ -2,6 +2,8 @@
 
 export AbstractFractal,
     def_hsv,
+    fhsv,
+    rhsv,
     black_white,
     DEFAULT_COLOR_MAP,
     DEFAULT_VIEW_SIZE,
@@ -19,12 +21,21 @@ using GLMakie
 
 #= colors {{{=#
 
-function def_hsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
+function fhsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
     if iters == maxiter
         return RGBf(0, 0, 0)
     end
     return HSV(360 * iters / maxiter, 0.8, 1.0)
 end
+
+function rhsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    return HSV(360 * (maxiter - iters) / maxiter, 0.8, 1.0)
+end
+
+def_hsv = rhsv
 
 function black_white(iters::I, maxiter::I)::RGBf where {I<:Integer}
     if iters == maxiter

@@ -10,12 +10,11 @@ function CUDAMandelbrot(;
     maxiter::I=Int32(DEFAULT_MAXITER),
     center::Complex{R1}=DEFAULT_CENTER,
     plane_size::Tuple{R3,R3}=DEFAULT_PLANE_SIZE,
-    color_map::F=DEFAULT_COLOR_MAP,
+    color_map::F where {F<:Function}=DEFAULT_COLOR_MAP,
     zoom_factor::R2=DEFAULT_ZOOM_FACTOR,
     coords_buffer::Union{CuMatrix{Complex{R1}},Nothing}=nothing,
     iters_in_buffer::Union{CuMatrix{I},Nothing}=nothing,
 )::Mandelbrot where {
-    F<:Function,
     S<:Integer,
     I<:Integer,
     R1<:Real,
@@ -130,7 +129,7 @@ function FractalExplorers.update!(
         iters_in_buffer,
         maxiter
     )
-    CUDA.@sync @cuda threads = threads blocks = nblocks cuda_update!(
+    CUDA.@sync @cuda threads = threads blocks = nblocks always_inline = true cuda_update!(
         coords_buffer,
         iters_in_buffer,
         maxiter

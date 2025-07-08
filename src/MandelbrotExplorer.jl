@@ -15,7 +15,6 @@ export Mandelbrot,
 #= basics {{{=#
 
 mutable struct Mandelbrot{
-    F<:Function,
     C<:Color,
     I<:Integer,
     R1<:Real,
@@ -24,7 +23,7 @@ mutable struct Mandelbrot{
     B2<:AbstractMatrix{I},
     B3<:AbstractMatrix{I},
 } <: AbstractFractal
-    color_map::F
+    color_map::F where {F<:Function}
     img::Observable{Matrix{C}}
     maxiter::I
     center::Complex{R1}
@@ -41,11 +40,10 @@ function Mandelbrot(;
     maxiter::I=DEFAULT_MAXITER,
     center::Complex{R1}=DEFAULT_CENTER,
     plane_size::Tuple{R3,R3}=DEFAULT_PLANE_SIZE,
-    color_map::F=DEFAULT_COLOR_MAP,
+    color_map::F where {F<:Function}=DEFAULT_COLOR_MAP,
     zoom_factor::R2=DEFAULT_ZOOM_FACTOR,
     coords_buffer::Union{B,Nothing}=nothing,
 )::Mandelbrot where {
-    F<:Function,
     S<:Integer,
     I<:Integer,
     R1<:Real,
@@ -118,13 +116,13 @@ function color!(
     img::Matrix{RGBf},
     iters_buffer::Matrix{I},
     maxiter::I
-) where {F,I<:Integer}
+) where {F<:Function,I<:Integer}
     @threads for i in eachindex(iters_buffer)
         @inbounds img[i] = color_map(iters_buffer[i], maxiter)
     end
 end
 
-function update!(m::Mandelbrot{F,C,I,R1,R2,B1,B2}) where {F,C,I,R1,R2,B1,B2}
+function update!(m::Mandelbrot{C,I,R1,R2,B1,B2}) where {C,I,R1,R2,B1,B2}
     prepare!(m.coords_buffer, R1.(size(m.img[])), m.center, m.plane_size)
     update!(m.coords_buffer, m.iters_in_buffer, m.iters_out_buffer, m.maxiter)
     color!(m.color_map, m.img[], m.iters_out_buffer, m.maxiter)
