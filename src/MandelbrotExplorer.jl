@@ -43,16 +43,14 @@ function Mandelbrot(;
     plane_size::Tuple{R3,R3}=DEFAULT_PLANE_SIZE,
     color_map::F where {F<:Function}=DEFAULT_COLOR_MAP,
     zoom_factor::R2=DEFAULT_ZOOM_FACTOR,
-    real_buffer::B=nothing,
-    imag_buffer::B=nothing,
+    real_buffer::Union{AbstractMatrix{R1},Nothing}=nothing,
+    imag_buffer::Union{AbstractMatrix{R1},Nothing}=nothing,
 )::Mandelbrot where {
     S<:Integer,
     I<:Integer,
     R1<:Real,
     R2<:Real,
     R3<:Real,
-    M<:AbstractMatrix{R1},
-    B<:Union{<:M,Nothing}
 }
     img = Observable(fill(RGBf(0, 0, 0), view_size))
     if real_buffer === nothing
@@ -88,13 +86,12 @@ function prepare!(
     center::Complex{R1},
     plane_size::Tuple{R2,R2}
 ) where {R1<:Real,R2<:Real}
-    @threads for i in axes(real_buffer, 1)
+    @threads for i in axes(real_buffer, 2)
         for j in axes(real_buffer, 1)
-            real_buffer[j, i] = -center.re + plane_size[1] * (j / asize[1] - 1 / R1(2))
-            imag_buffer[j, i] = center.im + plane_size[2] * (-i / asize[2] + 1 / R1(2))
+            @inbounds real_buffer[j, i] = -center.re + plane_size[1] * (j / asize[1] - 1 / R1(2))
+            @inbounds imag_buffer[j, i] = center.im + plane_size[2] * (-i / asize[2] + 1 / R1(2))
         end
     end
-
 end
 
 function calc_point(
@@ -107,8 +104,10 @@ function calc_point(
         if real * real + imag * imag >= R(4)
             return i
         end
-        real = real * real - imag * imag + start_real
-        imag = 2 * real * imag + start_imag
+        real, imag = (
+            real * real - imag * imag + start_real,
+            2 * real * imag + start_imag
+        )
     end
     return maxiter
 end
@@ -122,7 +121,7 @@ function update!(
     maxiter::I
 ) where {R<:Real,I<:Integer}
     @threads for i in eachindex(real_buffer)
-        iters_in_buffer[i] = calc_point(
+        @inbounds iters_in_buffer[i] = calc_point(
             real_buffer[i],
             imag_buffer[i],
             maxiter,
@@ -137,7 +136,7 @@ function color!(
     maxiter::I
 ) where {F<:Function,I<:Integer}
     @threads for i in eachindex(iters_buffer)
-        img[i] = color_map(iters_buffer[i], maxiter)
+        @inbounds img[i] = color_map(iters_buffer[i], maxiter)
     end
 end
 

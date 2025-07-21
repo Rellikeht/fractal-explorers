@@ -12,7 +12,8 @@ function CUDAMandelbrot(;
     plane_size::Tuple{R3,R3}=DEFAULT_PLANE_SIZE,
     color_map::F where {F<:Function}=DEFAULT_COLOR_MAP,
     zoom_factor::R2=DEFAULT_ZOOM_FACTOR,
-    coords_buffer::Union{CuMatrix{Complex{R1}},Nothing}=nothing,
+    real_buffer::Union{CuMatrix{R1},Nothing}=nothing,
+    imag_buffer::Union{CuMatrix{R1},Nothing}=nothing,
     iters_in_buffer::Union{CuMatrix{I},Nothing}=nothing,
 )::Mandelbrot where {
     S<:Integer,
@@ -22,8 +23,11 @@ function CUDAMandelbrot(;
     R3<:Real,
 }
     img = Observable(fill(RGBf(0, 0, 0), view_size))
-    if coords_buffer === nothing
-        coords_buffer = CUDA.zeros(Complex{R1}, view_size)
+    if real_buffer === nothing
+        real_buffer = CUDA.zeros(R1, view_size)
+    end
+    if imag_buffer === nothing
+        imag_buffer = CUDA.zeros(R1, view_size)
     end
     if iters_in_buffer === nothing
         iters_in_buffer = CUDA.zeros(I, view_size)
@@ -36,7 +40,8 @@ function CUDAMandelbrot(;
         Tuple{R1,R1}(plane_size),
         (R2(0.0), R2(0.0)),
         R2(zoom_factor),
-        coords_buffer,
+        real_buffer,
+        imag_buffer,
         iters_in_buffer,
         zeros(I, view_size)
     )
@@ -59,33 +64,37 @@ function max_therads(m::Mandelbrot)
     max_therads(
         length(m.iters_out_buffer),
         cuda_update!,
-        m.coords_buffer,
+        m.real_buffer,
+        m.imag_buffer,
         m.iters_in_buffer,
         m.maxiter,
     )
 end
 
 function FractalExplorers.prepare!(
-    buffer::B,
+    real_buffer::B,
+    imag_buffer::B,
     asize::Tuple{R1,R1},
     center::Complex{R1},
     plane_size::Tuple{R2,R2}
 ) where {
-    B<:Union{CuMatrix{Complex{R1}},CuDeviceMatrix{Complex{R1}}},
+    B<:Union{CuMatrix{R1},CuDeviceMatrix{R1}},
 } where {
     R1<:Real,
     R2<:Real
 }
     nblocks, threads = max_therads(
-        length(buffer),
+        length(real_buffer),
         cuda_prepare!,
-        buffer,
+        real_buffer,
+        imag_buffer,
         asize,
         center,
         plane_size
     )
     CUDA.@sync @cuda threads = threads blocks = nblocks cuda_prepare!(
-        buffer,
+        real_buffer,
+        imag_buffer,
         asize,
         center,
         plane_size
@@ -93,44 +102,46 @@ function FractalExplorers.prepare!(
 end
 
 function cuda_prepare!(
-    coords_buffer::B,
+    real_buffer::B,
+    imag_buffer::B,
     asize::Tuple{R1,R1},
     center::Complex{R1},
     plane_size::Tuple{R2,R2}
 ) where {
-    B<:Union{CuMatrix{Complex{R1}},CuDeviceMatrix{Complex{R1}}}
+    B<:Union{CuMatrix{R1},CuDeviceMatrix{R1}}
 } where {R1<:Real,R2<:Real}
-    bsize = Int32.(size(coords_buffer))
+    bsize = Int32.(size(real_buffer))
     k = (blockIdx().x - Int32(1)) * blockDim().x + threadIdx().x
     stride = gridDim().x * blockDim().x
-    @inbounds while k <= Int32(length(coords_buffer))
+    @inbounds while k <= Int32(length(real_buffer))
         i, j = divrem(k - 1, bsize[1]) .+ 1
-        coords_buffer[j, i] = Complex{R1}(
-            -center.re + plane_size[1] * (j / asize[1] - R1(1 / 2)),
-            center.im + plane_size[2] * (-i / asize[2] + R1(1 / 2))
-        )
+        real_buffer[j, i] = -center.re + plane_size[1] * (j / asize[1] - R1(1 / 2))
+        imag_buffer[j, i] = center.im + plane_size[2] * (-i / asize[2] + R1(1 / 2))
         k += stride
     end
 end
 
 function FractalExplorers.update!(
-    coords_buffer::B1,
+    real_buffer::B1,
+    imag_buffer::B1,
     iters_in_buffer::B2,
     iters_out_buffer::Matrix{I},
     maxiter::I
 ) where {
-    B1<:Union{CuMatrix{Complex{R}},CuDeviceMatrix{Complex{R}}},
+    B1<:Union{CuMatrix{R},CuDeviceMatrix{R}},
     B2<:Union{CuMatrix{I},CuDeviceMatrix{I}}
 } where {R<:Real,I<:Integer}
     nblocks, threads = max_therads(
-        length(coords_buffer),
+        length(real_buffer),
         cuda_update!,
-        coords_buffer,
+        real_buffer,
+        imag_buffer,
         iters_in_buffer,
         maxiter
     )
     CUDA.@sync @cuda threads = threads blocks = nblocks always_inline = true cuda_update!(
-        coords_buffer,
+        real_buffer,
+        imag_buffer,
         iters_in_buffer,
         maxiter
     )
@@ -138,18 +149,20 @@ function FractalExplorers.update!(
 end
 
 function cuda_update!(
-    coords_buffer::B1,
+    real_buffer::B1,
+    imag_buffer::B1,
     iters_buffer::B2,
     maxiter::I
 ) where {
-    B1<:Union{CuMatrix{Complex{R}},CuDeviceMatrix{Complex{R}}},
+    B1<:Union{CuMatrix{R},CuDeviceMatrix{R}},
     B2<:Union{CuMatrix{I},CuDeviceMatrix{I}},
 } where {R<:Real,I<:Integer}
     i = (blockIdx().x - Int32(1)) * blockDim().x + threadIdx().x
     stride = gridDim().x * blockDim().x
-    @inbounds while i < Int32(length(coords_buffer))
+    @inbounds while i < Int32(length(real_buffer))
         iters_buffer[i] = cuda_calc_point(
-            coords_buffer[i],
+            real_buffer[i],
+            imag_buffer[i],
             maxiter
         )
         i += stride
@@ -169,7 +182,7 @@ function cuda_calc_point(
     maxiter::I
 )::I where {R<:Real,I<:Integer}
     point = start_point
-    for i in I(0):maxiter-I(0)
+    for i in I(0):maxiter-I(1)
         xs, ys = point.re * point.re, point.im * point.im
         if xs + ys >= R(4)
             return i
@@ -177,6 +190,25 @@ function cuda_calc_point(
         point = Complex(
             xs - ys + start_point.re,
             2 * point.re * point.im + start_point.im
+        )
+    end
+    return maxiter
+end
+
+function cuda_calc_point(
+    start_real::R,
+    start_imag::R,
+    maxiter::I,
+)::I where {R<:Real,I<:Integer}
+    real, imag = start_real, start_imag
+    for i in I(0):maxiter-I(1)
+        xs, ys = real * real, imag * imag
+        if xs + ys >= R(4)
+            return i
+        end
+        real, imag = (
+            xs - ys + start_real,
+            2 * real * imag + start_imag
         )
     end
     return maxiter
