@@ -169,7 +169,7 @@ function cuda_calc_point(
     maxiter::I
 )::I where {R<:Real,I<:Integer}
     point = start_point
-    for i in I(0):maxiter-I(0)
+    for i in I(0):maxiter-I(1)
         xs, ys = point.re * point.re, point.im * point.im
         if xs + ys >= R(4)
             return i
