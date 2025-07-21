@@ -35,15 +35,16 @@ function rhsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
     return HSV(360 * (maxiter - iters) / maxiter, 0.8, 1.0)
 end
 
-def_hsv = rhsv
-
 function black_white(iters::I, maxiter::I)::RGBf where {I<:Integer}
-    if iters == maxiter
-        return RGBf(0, 0, 0)
-    end
     v = 1.0 - iters / maxiter
     return RGBf(v, v, v)
 end
+
+function white_black(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    return RGBf(iters / maxiter, iters / maxiter, iters / maxiter)
+end
+
+const def_hsv = rhsv
 
 #= }}}=#
 
@@ -81,6 +82,9 @@ function fractal!(
     end
     try
         deregister_interaction!(ax, ZOOM_ACTION)
+    catch
+    end
+    try
         deregister_interaction!(ax, DRAG_ACTION)
     catch
     end
@@ -131,6 +135,14 @@ function zoom!(
     update!(fractal)
 end
 
+function zoom!(
+    fractal::AbstractFractal,
+    factor::N,
+) where {N<:Number}
+    fractal.plane_size = fractal.plane_size .* factor
+    update!(fractal)
+end
+
 function move!(fractal::AbstractFractal)
     (event::MouseEvent, axis::Axis) -> move!(fractal, event, axis)
 end
@@ -156,6 +168,24 @@ function move!(
             update!(fractal)
         end
     end
+end
+
+function move!(
+    fractal::AbstractFractal,
+    amount::Tuple{N,N}
+) where {N<:Number}
+    fractal.center =
+        (fractal.center.re + amount[1]) +
+        (fractal.center.im + amount[2])im
+    update!(fractal)
+end
+
+function move!(
+    fractal::AbstractFractal,
+    amount::Complex{N},
+) where {N<:Number}
+    fractal.center += amount
+    update!(fractal)
 end
 
 #= }}}=#
