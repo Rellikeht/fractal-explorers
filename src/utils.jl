@@ -10,9 +10,7 @@ export AbstractFractal,
     DEFAULT_MAXITER,
     DEFAULT_CENTER,
     DEFAULT_PLANE_SIZE,
-    DEFAULT_ZOOM_FACTOR,
-    fractal!,
-    simple_setup
+    DEFAULT_ZOOM_FACTOR
 
 using Colors
 using GLMakie
@@ -68,17 +66,17 @@ const RESET_ACTION = :reset
 
 #= actions {{{=#
 
-# TODO reset without changing fractal structure
-# function reset!(fractal::AbstractFractal)
-#     fractal.center = DEFAULT_CENTER
-#     fractal.plane_size = DEFAULT_PLANE_SIZE
-#     update!(fractal)
-# end
+function reset!(fractal::AbstractFractal)
+    # TODO how to properly implement this
+    # fractal.center = DEFAULT_CENTER
+    # fractal.plane_size = DEFAULT_PLANE_SIZE
+    update!(fractal)
+end
 
 function zoom!(
     fractal::AbstractFractal,
-    factor::N,
-) where {N<:Number}
+    factor::Real,
+)
     fractal.plane_size = fractal.plane_size .* factor
     update!(fractal)
 end
@@ -86,7 +84,7 @@ end
 function move!(
     fractal::AbstractFractal,
     amount::Tuple{N,N}
-) where {N<:Number}
+) where {N<:Real}
     fractal.center =
         (fractal.center.re + amount[1]) +
         (fractal.center.im + amount[2])im
@@ -95,9 +93,17 @@ end
 
 function move!(
     fractal::AbstractFractal,
-    amount::Complex{N},
-) where {N<:Number}
+    amount::Complex{<:Real},
+)
     fractal.center += amount
+    update!(fractal)
+end
+
+function change_maxiter!(
+    fractal::AbstractFractal,
+    maxiter::Integer
+)
+    fractal.maxiter = maxiter
     update!(fractal)
 end
 
