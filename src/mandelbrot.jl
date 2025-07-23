@@ -75,7 +75,7 @@ end
 
 function prepare!(
     coords_buffer::Matrix{Complex{R1}},
-    asize::Tuple{R1,R1},
+    img_size::Tuple{R1,R1},
     center::Complex{R1},
     plane_size::Tuple{R2,R2}
 ) where {R1<:Real,R2<:Real}
@@ -83,8 +83,8 @@ function prepare!(
     @threads for i in axes(coords_buffer, 2)
         for j in axes(coords_buffer, 1)
             @inbounds coords_buffer[j, i] = Complex{R1}(
-                -center.re + plane_size[1] * (j / asize[1] - R1(1 / 2)),
-                center.im + plane_size[2] * (-i / asize[2] + R1(1 / 2))
+                -center.re + plane_size[1] * (j / img_size[1] - R1(1 / 2)),
+                center.im + plane_size[2] * (-i / img_size[2] + R1(1 / 2))
             )
         end
     end

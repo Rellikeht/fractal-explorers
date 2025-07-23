@@ -63,7 +63,7 @@ function calc_point(
     maxiter::I
 )::I where {R<:Real,I<:Integer}
     point = start_point
-    for i in I(0):maxiter-1
+    for i in I(0):maxiter-I(1)
         if point.re * point.re + point.im * point.im >= R(4)
             return i
         end
@@ -76,12 +76,12 @@ function update!(
     m::MandelbrotCPU{C,I,R1,R2},
     color_map::F,
 ) where {C,I,R1,R2,F<:Function}
-    asize = R1.(size(m.img[]))
+    img_size = R1.(size(m.img[]))
     @threads for i in axes(m.img[], 2)
         for j in axes(m.img[], 1)
             point = Complex{R1}(
-                -m.center.re + m.plane_size[1] * (j / asize[1] - R1(1 / 2)),
-                m.center.im + m.plane_size[2] * (-i / asize[2] + R1(1 / 2))
+                -m.center.re + m.plane_size[1] * (j / img_size[1] - R1(1 / 2)),
+                m.center.im + m.plane_size[2] * (-i / img_size[2] + R1(1 / 2))
             )
             @inbounds m.img[][j, i] = color_map(calc_point(point, m.maxiter), m.maxiter)
         end
@@ -91,9 +91,7 @@ function update!(
     nothing
 end
 
-function update!(
-    m::MandelbrotCPU{C,I,R1,R2}
-) where {C,I,R1,R2}
+function update!(m::MandelbrotCPU{C,I,R1,R2}) where {C,I,R1,R2}
     update!(m, m.color_map)
 end
 

@@ -5,6 +5,7 @@ export AbstractFractal,
     fhsv,
     rhsv,
     black_white,
+    white_black,
     DEFAULT_COLOR_MAP,
     DEFAULT_VIEW_SIZE,
     DEFAULT_MAXITER,
@@ -105,6 +106,10 @@ function change_maxiter!(
 )
     fractal.maxiter = maxiter
     update!(fractal)
+end
+
+function GLMakie.save(name::String, fractal::AbstractFractal)
+    GLMakie.save(name, rotl90(fractal.img[]))
 end
 
 #= }}}=#

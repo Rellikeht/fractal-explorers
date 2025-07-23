@@ -108,13 +108,14 @@ function advanced_setup(
         f[1, 2],
         label="Reset"
     )
+    steps = f.scene.viewport[].widths[2] - f.scene.viewport[].origin[2]
     # TODO more vertical slider
     sl = SliderGrid(
         f[2, 2],
         (
             label="maxiter",
             format=n -> string(calc_maxiter(n)),
-            range=range(min_iters, max_iters, 100 + 1),
+            range=range(min_iters, max_iters, div(steps, 2) + 1),
             startvalue=log10(fractal.maxiter),
             horizontal=false,
         )

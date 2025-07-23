@@ -67,7 +67,7 @@ end
 
 function FractalExplorers.prepare!(
     buffer::B,
-    asize::Tuple{R1,R1},
+    img_size::Tuple{R1,R1},
     center::Complex{R1},
     plane_size::Tuple{R2,R2}
 ) where {
@@ -80,13 +80,13 @@ function FractalExplorers.prepare!(
         length(buffer),
         cuda_prepare!,
         buffer,
-        asize,
+        img_size,
         center,
         plane_size
     )
     CUDA.@sync @cuda threads = threads blocks = nblocks cuda_prepare!(
         buffer,
-        asize,
+        img_size,
         center,
         plane_size
     )
