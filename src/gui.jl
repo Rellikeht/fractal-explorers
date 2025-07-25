@@ -1,5 +1,7 @@
 #= import/export, consts {{{=#
 
+using Observables
+
 export fractal!,
     move!,
     zoom!,
@@ -101,7 +103,7 @@ function advanced_setup(
     min_iters::Real=log10(DEFAULT_MIN_ITERS),
     max_iters::Real=log10(DEFAULT_MAX_ITERS),
     calc_maxiter::Function=DEFAULT_CALC_MAXITER,
-)::Tuple{Figure,Axis}
+)::Tuple{Figure,Axis,ObserverFunction,ObserverFunction}
     f = figure(fractal)
     ax = Axis(f[1:2, 1])
     b = Button(
@@ -120,11 +122,11 @@ function advanced_setup(
             horizontal=false,
         )
     )
-    on(change_maxiter!(fractal, calc_maxiter), sl.sliders[1].value)
-    on(_ -> reset!(fractal), b.clicks)
+    on_change = on(change_maxiter!(fractal, calc_maxiter), sl.sliders[1].value)
+    on_reset = on(_ -> reset!(fractal), b.clicks)
     rowsize!(sl.layout, 1, Relative(0.95))
     clean_axis!(ax)
-    return f, ax
+    return f, ax, on_change, on_reset
 end
 
 function advanced_gui(fractal::AbstractFractal)::Figure

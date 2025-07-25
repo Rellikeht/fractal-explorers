@@ -5,7 +5,8 @@ export Observable, RGBf, prepare!, update!
 
 include("utils.jl")
 include("gui.jl")
-include("mandelbrot_cpu.jl")
-include("mandelbrot.jl")
+include("calculations.jl")
+include("icfractal_cpu.jl")
+include("icfractal.jl")
 
 end # module FractalExplorers

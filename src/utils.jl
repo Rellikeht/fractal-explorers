@@ -5,13 +5,7 @@ export AbstractFractal,
     fhsv,
     rhsv,
     black_white,
-    white_black,
-    DEFAULT_COLOR_MAP,
-    DEFAULT_VIEW_SIZE,
-    DEFAULT_MAXITER,
-    DEFAULT_CENTER,
-    DEFAULT_PLANE_SIZE,
-    DEFAULT_ZOOM_FACTOR
+    white_black
 
 using Colors
 using GLMakie
@@ -50,6 +44,7 @@ const def_hsv = rhsv
 #= setup {{{=#
 
 abstract type AbstractFractal end
+abstract type AbstractIFractal <: AbstractFractal end
 
 const DEFAULT_COLOR_MAP = def_hsv
 const DEFAULT_VIEW_SIZE = (1920, 1080)
@@ -65,46 +60,12 @@ const RESET_ACTION = :reset
 
 #= }}}=#
 
-#= actions {{{=#
+#= other {{{=#
 
 function reset!(fractal::AbstractFractal)
     # TODO how to properly implement this
     # fractal.center = DEFAULT_CENTER
     # fractal.plane_size = DEFAULT_PLANE_SIZE
-    update!(fractal)
-end
-
-function zoom!(
-    fractal::AbstractFractal,
-    factor::Real,
-)
-    fractal.plane_size = fractal.plane_size .* factor
-    update!(fractal)
-end
-
-function move!(
-    fractal::AbstractFractal,
-    amount::Tuple{N,N}
-) where {N<:Real}
-    fractal.center =
-        (fractal.center.re + amount[1]) +
-        (fractal.center.im + amount[2])im
-    update!(fractal)
-end
-
-function move!(
-    fractal::AbstractFractal,
-    amount::Complex{<:Real},
-)
-    fractal.center += amount
-    update!(fractal)
-end
-
-function change_maxiter!(
-    fractal::AbstractFractal,
-    maxiter::Integer
-)
-    fractal.maxiter = maxiter
     update!(fractal)
 end
 
