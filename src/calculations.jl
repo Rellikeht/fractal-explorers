@@ -2,7 +2,10 @@
 
 export mandelbrot_calculation,
     drunkenbrot_calculation,
-    test_mandelbrot_calculation
+    test1_mandelbrot_calculation,
+    test2_mandelbrot_calculation,
+    test3_mandelbrot_calculation,
+    test4_mandelbrot_calculation
 
 #= }}}=#
 

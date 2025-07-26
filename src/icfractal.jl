@@ -24,7 +24,6 @@ mutable struct ICFractal{
     B1<:AbstractMatrix{Complex{R1}},
     B2<:AbstractMatrix{I},
     B3<:AbstractMatrix{I},
-    P
 } <: AbstractIFractal
     color_map::F1 where {F1<:Function}
     calculation::F2 where {F2<:Function}
@@ -37,7 +36,7 @@ mutable struct ICFractal{
     coords_buffer::B1
     iters_in_buffer::B2
     iters_out_buffer::B3
-    params::P
+    params
 end
 
 function ICFractal(;
@@ -158,7 +157,7 @@ function color!(
     end
 end
 
-function update!(f::ICFractal{C,I,R1,R2,B1,B2,B3,P}) where {C,I,R1,R2,B1,B2,B3,P}
+function update!(f::ICFractal{C,I,R1,R2,B1,B2,B3}) where {C,I,R1,R2,B1,B2,B3}
     prepare!(f.coords_buffer, R1.(size(f.img[])), f.center, f.plane_size)
     update!(
         f.coords_buffer,

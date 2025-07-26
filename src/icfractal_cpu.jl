@@ -17,7 +17,6 @@ mutable struct ICFractalCPU{
     I<:Integer,
     R1<:Real,
     R2<:Real,
-    P,
 } <: AbstractIFractal
     color_map::F1 where {F1<:Function}
     calculation::F2 where {F2<:Function}
@@ -27,7 +26,7 @@ mutable struct ICFractalCPU{
     plane_size::Tuple{R1,R1}
     drag_distance::Tuple{R2,R2}
     zoom_factor::R2
-    params::P
+    params
 end
 
 function ICFractalCPU(;
@@ -71,10 +70,10 @@ function move!(
 end
 
 function update!(
-    m::ICFractalCPU{C,I,R1,R2,P},
+    m::ICFractalCPU{C,I,R1,R2},
     color_map::F1,
     calculation::F2,
-) where {C,I,R1,R2,P,F1<:Function,F2<:Function}
+) where {C,I,R1,R2,F1<:Function,F2<:Function}
     img_size = R1.(size(m.img[]))
     @threads for i in axes(m.img[], 2)
         for j in axes(m.img[], 1)
@@ -90,7 +89,7 @@ function update!(
     nothing
 end
 
-function update!(m::ICFractalCPU{C,I,R1,R2,P}) where {C,I,R1,R2,P}
+function update!(m::ICFractalCPU{C,I,R1,R2}) where {C,I,R1,R2}
     update!(m, m.color_map, m.calculation)
 end
 

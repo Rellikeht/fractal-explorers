@@ -5,7 +5,14 @@ export AbstractFractal,
     fhsv,
     rhsv,
     black_white,
-    white_black
+    white_black,
+    DEFAULT_COLOR_MAP,
+    DEFAULT_CALCULATION,
+    DEFAULT_MAXITER,
+    DEFAULT_CENTER,
+    DEFAULT_PLANE_SIZE,
+    DEFAULT_VIEW_SIZE,
+    DEFAULT_ZOOM_FACTOR
 
 using Colors
 using GLMakie
