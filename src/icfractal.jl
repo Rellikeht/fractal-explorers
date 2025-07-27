@@ -1,13 +1,9 @@
-#= import/export {{{=#
+#= imports and settings {{{=#
 
 using GLMakie
 using Colors
 import Base.Threads: @threads
 GLMakie.activate!(; framerate=60)
-
-export ICFractal,
-    update!,
-    prepare!
 
 #= }}}=#
 
@@ -86,7 +82,7 @@ function zoom!(
     factor::Real,
 )
     fractal.plane_size = fractal.plane_size .* factor
-    update!(fractal)
+    recalculate!(fractal)
 end
 
 function move!(
@@ -96,7 +92,7 @@ function move!(
     fractal.center =
         (fractal.center.re + amount[1]) +
         (fractal.center.im + amount[2])im
-    update!(fractal)
+    recalculate!(fractal)
 end
 
 function move!(
@@ -104,7 +100,7 @@ function move!(
     amount::Complex{<:Real},
 )
     fractal.center += amount
-    update!(fractal)
+    recalculate!(fractal)
 end
 
 function change_maxiter!(
@@ -112,7 +108,7 @@ function change_maxiter!(
     maxiter::Integer
 )
     fractal.maxiter = maxiter
-    update!(fractal)
+    recalculate!(fractal)
 end
 
 #= }}}=#
@@ -134,7 +130,7 @@ function prepare!(
     end
 end
 
-function update!(
+function recalculate!(
     coords_buffer::Matrix{Complex{R}},
     calculation::F,
     iters_in_buffer::Matrix{I},
@@ -157,9 +153,9 @@ function color!(
     end
 end
 
-function update!(f::ICFractal{C,I,R1,R2,B1,B2,B3}) where {C,I,R1,R2,B1,B2,B3}
+function recalculate!(f::ICFractal{C,I,R1,R2,B1,B2,B3}) where {C,I,R1,R2,B1,B2,B3}
     prepare!(f.coords_buffer, R1.(size(f.img[])), f.center, f.plane_size)
-    update!(
+    recalculate!(
         f.coords_buffer,
         f.calculation,
         f.iters_in_buffer,

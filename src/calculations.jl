@@ -1,14 +1,3 @@
-#= setup {{{=#
-
-export mandelbrot_calculation,
-    drunkenbrot_calculation,
-    test1_mandelbrot_calculation,
-    test2_mandelbrot_calculation,
-    test3_mandelbrot_calculation,
-    test4_mandelbrot_calculation
-
-#= }}}=#
-
 #= standard functions {{{=#
 
 function mandelbrot_calculation(
@@ -39,7 +28,7 @@ function drunkenbrot_calculation(
 )::I where {R<:Real,I<:Integer}
     point = start_point
     for i in I(0):maxiter-I(1)
-        if point.re * point.re + point.im * point.im >= R(4)
+        if point.re * point.re + point.im * point.im >= R(9)
             return i
         end
         re, im = point.re, point.im
@@ -112,7 +101,7 @@ function test4_mandelbrot_calculation(
 )::I where {R<:Real,I<:Integer}
     point = start_point
     for i in I(0):maxiter-I(1)
-        if point.re * point.re + point.im * point.im >= R(8)
+        if point.re * point.re + point.im * point.im >= R(9)
             return i
         end
         re, im = point.re, point.im

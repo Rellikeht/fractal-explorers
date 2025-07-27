@@ -1,12 +1,9 @@
-#= import/export {{{=#
+#= imports and settings {{{=#
 
 using GLMakie
 using Colors
 import Base.Threads: @threads
 GLMakie.activate!(; framerate=60)
-
-export ICFractalCPU,
-    update!
 
 #= }}}=#
 
@@ -66,10 +63,10 @@ function move!(
     amount::Complex{<:Real},
 )
     fractal.center += amount
-    update!(fractal)
+    recalculate!(fractal)
 end
 
-function update!(
+function recalculate!(
     m::ICFractalCPU{C,I,R1,R2},
     color_map::F1,
     calculation::F2,
@@ -89,8 +86,8 @@ function update!(
     nothing
 end
 
-function update!(m::ICFractalCPU{C,I,R1,R2}) where {C,I,R1,R2}
-    update!(m, m.color_map, m.calculation)
+function recalculate!(m::ICFractalCPU{C,I,R1,R2}) where {C,I,R1,R2}
+    recalculate!(m, m.color_map, m.calculation)
 end
 
 #= }}}=#

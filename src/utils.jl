@@ -1,21 +1,10 @@
-#= import/export {{{=#
-
-export AbstractFractal,
-    def_hsv,
-    fhsv,
-    rhsv,
-    black_white,
-    white_black,
-    DEFAULT_COLOR_MAP,
-    DEFAULT_CALCULATION,
-    DEFAULT_MAXITER,
-    DEFAULT_CENTER,
-    DEFAULT_PLANE_SIZE,
-    DEFAULT_VIEW_SIZE,
-    DEFAULT_ZOOM_FACTOR
+#= definitions {{{=#
 
 using Colors
 using GLMakie
+
+abstract type AbstractFractal end
+abstract type AbstractIFractal <: AbstractFractal end
 
 #= }}}=#
 
@@ -48,10 +37,7 @@ const def_hsv = rhsv
 
 #= }}}=#
 
-#= setup {{{=#
-
-abstract type AbstractFractal end
-abstract type AbstractIFractal <: AbstractFractal end
+#= defaults {{{=#
 
 const DEFAULT_COLOR_MAP = def_hsv
 const DEFAULT_VIEW_SIZE = (1920, 1080)
@@ -67,17 +53,26 @@ const RESET_ACTION = :reset
 
 #= }}}=#
 
-#= other {{{=#
+#= utilities {{{=#
 
 function reset!(fractal::AbstractFractal)
     # TODO how to properly implement this
     # fractal.center = DEFAULT_CENTER
     # fractal.plane_size = DEFAULT_PLANE_SIZE
-    update!(fractal)
+    recalculate!(fractal)
 end
 
 function GLMakie.save(name::String, fractal::AbstractFractal)
     GLMakie.save(name, rotl90(fractal.img[]))
+end
+
+macro supress_err(block)
+    return quote
+        try
+            $block
+        catch
+        end
+    end
 end
 
 #= }}}=#
