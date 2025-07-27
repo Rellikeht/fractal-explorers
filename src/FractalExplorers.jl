@@ -5,11 +5,13 @@ export Observable, RGBf
 
 export
     AbstractFractal,
-    def_hsv,
-    fhsv,
-    rhsv,
+    default_hsv,
+    reverse_hsv,
+    simple_hsv,
+    reverse_simple_hsv,
     black_white,
     white_black,
+    trippy,
     DEFAULT_COLOR_MAP,
     DEFAULT_CALCULATION,
     DEFAULT_MAXITER,
