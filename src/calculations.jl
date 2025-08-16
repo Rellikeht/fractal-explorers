@@ -18,6 +18,51 @@ function mandelbrot_calculation(
     return maxiter
 end
 
+function _mandelbrot_calculation(
+    start_point::Complex{N},
+    maxiter::I
+)::I where {N<:Real,I<:Integer}
+    point = start_point
+    temp = start_point
+    n = I(20)
+    iters = 0
+    for _ in I(1):div(maxiter, n)
+        for _ in I(1):n
+            temp = temp * temp + start_point
+        end
+        if isnan(temp) || temp.re * temp.re + temp.im * temp.im >= N(4)
+            for i in I(0):n-I(1)
+                xs, ys = point.re * point.re, point.im * point.im
+                if xs + ys >= N(4)
+                    return iters + i
+                end
+                point = Complex(
+                    xs - ys + start_point.re,
+                    2 * point.re * point.im + start_point.im
+                )
+            end
+        end
+        point = temp
+        iters += n
+    end
+    xs, ys = point.re * point.re, point.im * point.im
+    for i in I(0):rem(maxiter, n)-I(2)
+        xs, ys = point.re * point.re, point.im * point.im
+        if xs + ys >= N(4)
+            return iters + i
+        end
+        point = Complex(
+            xs - ys + start_point.re,
+            2 * point.re * point.im + start_point.im
+        )
+        point = point * point + start_point
+    end
+    if xs + ys >= N(4)
+        return maxiter - I(1)
+    end
+    return maxiter
+end
+
 # TODO julia set
 
 const DEFAULT_CALCULATION = mandelbrot_calculation
