@@ -79,15 +79,15 @@ function transform_float_type(
     ICFractal(
         f.color_map,
         f.calculation,
-        Observable(f.img[][:,:]),
+        Observable(f.img[][:, :]),
         f.maxiter,
         new_type(f.center),
         R.(f.plane_size),
         f.drag_distance,
         f.zoom_factor,
         new_type.(f.coords_buffer),
-        f.iters_in_buffer[:,:],
-        f.iters_out_buffer[:,:],
+        f.iters_in_buffer[:, :],
+        f.iters_out_buffer[:, :],
         f.params
     )
 end
@@ -100,8 +100,6 @@ function transform_float_type(
 end
 
 #= }}}=#
-
-#= calculation {{{=#
 
 #= actions {{{=#
 
@@ -141,18 +139,20 @@ end
 
 #= }}}=#
 
+#= calculation {{{=#
+
 function prepare!(
-    coords_buffer::Matrix{Complex{R1}},
-    img_size::Tuple{R1,R1},
-    center::Complex{R1},
-    plane_size::Tuple{R2,R2}
-) where {R1<:Real,R2<:Real}
+    coords_buffer::Matrix{Complex{R}},
+    img_size::Tuple{R,R},
+    center::Complex{R},
+    plane_size::Tuple{R,R}
+) where {R<:Real}
     # bsize = size(coords_buffer)
     @threads for i in axes(coords_buffer, 2)
         for j in axes(coords_buffer, 1)
-            @inbounds coords_buffer[j, i] = Complex{R1}(
-                -center.re + plane_size[1] * (j / img_size[1] - R1(1 / 2)),
-                center.im + plane_size[2] * (-i / img_size[2] + R1(1 / 2))
+            @inbounds coords_buffer[j, i] = Complex{R}(
+                -center.re + plane_size[1] * (j / img_size[1] - R(1 / 2)),
+                center.im + plane_size[2] * (-i / img_size[2] + R(1 / 2))
             )
         end
     end
@@ -188,8 +188,9 @@ function color!(
     end
 end
 
-function recalculate!(f::ICFractal{C,I,R1,R2,B1,B2,B3}) where {C,I,R1,R2,B1,B2,B3}
-    prepare!(f.coords_buffer, R1.(size(f.img[])), f.center, f.plane_size)
+function recalculate!(f::ICFractal)
+    R = typeof(f.center).parameters[1]
+    prepare!(f.coords_buffer, R.(size(f.img[])), f.center, f.plane_size)
     recalculate!(
         f.coords_buffer,
         f.calculation,

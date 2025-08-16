@@ -9,6 +9,9 @@ GLMakie.activate!(; framerate=60)
 
 #= setup {{{=#
 
+"
+Iterated Complex Fractal built for cpu calculations
+"
 mutable struct ICFractalCPU{
     C<:Color,
     I<:Integer,
@@ -62,7 +65,7 @@ function transform_float_type(
     ICFractalCPU(
         f.color_map,
         f.calculation,
-        Observable(f.img[][:,:]),
+        Observable(f.img[][:, :]),
         f.maxiter,
         new_type(f.center),
         R.(f.plane_size),
@@ -92,28 +95,39 @@ function move!(
 end
 
 function recalculate!(
-    m::ICFractalCPU{C,I,R1,R2},
     color_map::F1,
-    calculation::F2
-) where {C,I,R1,R2,F1<:Function,F2<:Function}
-    img_size = R1.(size(m.img[]))
-    @threads for i in axes(m.img[], 2)
-        for j in axes(m.img[], 1)
+    calculation::F2,
+    center::Complex{R1},
+    img::Observable{<:Matrix{<:Color}},
+    maxiter::Integer,
+    plane_size::Tuple{R2,R2},
+    params::Union{Nothing,<:NamedTuple}
+) where {F1<:Function,F2<:Function,R1<:Real,R2<:Real}
+    img_size = R1.(size(img[]))
+    @threads for i in axes(img[], 2)
+        for j in axes(img[], 1)
             point = Complex{R1}(
-                -m.center.re + m.plane_size[1] * (j / img_size[1] - R1(1 / 2)),
-                m.center.im + m.plane_size[2] * (-i / img_size[2] + R1(1 / 2))
+                -center.re + plane_size[1] * (j / img_size[1] - R1(1 / 2)),
+                center.im + plane_size[2] * (-i / img_size[2] + R1(1 / 2))
             )
-            @inbounds m.img[][j, i] = color_map(calculation(point, m.maxiter, m.params), m.maxiter)
+            @inbounds img[][j, i] = color_map(calculation(point, maxiter, params), maxiter)
         end
     end
     # this triggers update
-    m.img[] = m.img[]
+    img[] = img[]
     nothing
 end
 
-function recalculate!(m::ICFractalCPU{C,I,R1,R2}) where {C,I,R1,R2}
-    recalculate!(m, m.color_map, m.calculation)
+function recalculate!(m::ICFractalCPU)
+    recalculate!(
+        m.color_map,
+        m.calculation,
+        m.center,
+        m.img,
+        m.maxiter,
+        m.plane_size,
+        m.params
+    )
 end
-
 
 #= }}}=#

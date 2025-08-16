@@ -55,6 +55,24 @@ function trippy(iters::I, maxiter::I)::RGBf where {I<:Integer}
     )
 end
 
+function blue_hsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    return HSV(240, 0.8, 0.1 + 0.9 * iters / maxiter)
+end
+
+function blue_white(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    return HSV(240, 0.8 - 0.8 * iters / maxiter, 0.1 + 0.8 * iters / maxiter)
+end
+
+function blue_total_white(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    return HSV(240, 0.8 - 0.8 * iters / maxiter, 0.1 + 0.8 * iters / maxiter)
+end
+
 #= }}}=#
 
 #= defaults {{{=#
