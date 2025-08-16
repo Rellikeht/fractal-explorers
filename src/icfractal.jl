@@ -71,6 +71,34 @@ function ICFractal(;
     )
 end
 
+function transform_float_type(
+    f::ICFractal,
+    new_type::Type{<:Complex{R}} where {R<:Real}
+)::ICFractal
+    R = new_type.parameters[1]
+    ICFractal(
+        f.color_map,
+        f.calculation,
+        Observable(f.img[][:,:]),
+        f.maxiter,
+        new_type(f.center),
+        R.(f.plane_size),
+        f.drag_distance,
+        f.zoom_factor,
+        new_type.(f.coords_buffer),
+        f.iters_in_buffer[:,:],
+        f.iters_out_buffer[:,:],
+        f.params
+    )
+end
+
+function transform_float_type(
+    f::ICFractal,
+    new_type::Type{<:Real}
+)::ICFractal
+    transform_float_type(f, Complex{new_type})
+end
+
 #= }}}=#
 
 #= calculation {{{=#

@@ -54,6 +54,31 @@ function ICFractalCPU(;
     )
 end
 
+function transform_float_type(
+    f::ICFractalCPU,
+    new_type::Type{<:Complex{R}} where {R<:Real}
+)::ICFractalCPU
+    R = new_type.parameters[1]
+    ICFractalCPU(
+        f.color_map,
+        f.calculation,
+        Observable(f.img[][:,:]),
+        f.maxiter,
+        new_type(f.center),
+        R.(f.plane_size),
+        f.drag_distance,
+        f.zoom_factor,
+        f.params
+    )
+end
+
+function transform_float_type(
+    f::ICFractalCPU,
+    new_type::Type{<:Real}
+)::ICFractalCPU
+    transform_float_type(f, Complex{new_type})
+end
+
 #= }}}=#
 
 #= calculations {{{=#

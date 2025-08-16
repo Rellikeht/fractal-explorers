@@ -26,6 +26,8 @@ export
     zoom!,
     reset!,
     change_maxiter!,
+    transform_float_type,
+    transform_float_type!,
     simple_setup,
     advanced_setup,
     simple_gui,
@@ -43,6 +45,7 @@ export
 export
     ICFractal,
     ICFractalCPU,
+    transform_float_type,
     recalculate!,
     prepare!,
     color!,

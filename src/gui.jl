@@ -7,6 +7,14 @@ const DEFAULT_MAX_ITERS = 100000
 
 #= }}}=#
 
+#= helpers {{{=#
+
+function get_fractal(ax::Axis)::AbstractFractal
+    return ax.interactions[:fractal][2]()
+end
+
+#= }}}=#
+
 #= actions {{{=#
 
 function zoom!(fractal::AbstractFractal)
@@ -54,6 +62,26 @@ function change_maxiter!(
     return function (value::Real)
         change_maxiter!(fractal, calc_maxiter(value))
     end
+end
+
+function transform_float_type(
+    ax::Axis,
+    new_type::Type{<:Number}
+)::AbstractFractal
+    new_fractal = transform_float_type(
+        get_fractal(ax),
+        new_type
+    )
+    return new_fractal
+end
+
+function transform_float_type!(
+    ax::Axis,
+    new_type::Type{<:Number}
+)::AbstractFractal
+    new_fractal = transform_float_type(ax, new_type)
+    fractal!(ax, new_fractal)
+    return new_fractal
 end
 
 #= }}}=#
@@ -146,19 +174,21 @@ function fractal!(
     static::Bool=false
 )
     image!(ax, fractal.img)
-    is = ax |> interactions |> keys
+    ax_interactions = ax |> interactions |> keys
     for interaction in [
         :scrollzoom,
         :dragpan,
         :rectanglezoom,
         :limitreset,
+        :fractal,
         ZOOM_ACTION,
         DRAG_ACTION,
     ]
-        if interaction in is
+        if interaction in ax_interactions
             deregister_interaction!(ax, interaction)
         end
     end
+    register_interaction!(() -> fractal, ax, FRACTAL_ACTION)
     if !static
         register_interaction!(zoom!(fractal), ax, ZOOM_ACTION)
         register_interaction!(move!(fractal), ax, DRAG_ACTION)
