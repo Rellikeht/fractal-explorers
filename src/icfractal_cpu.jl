@@ -23,7 +23,7 @@ mutable struct ICFractalCPU{
     plane_size::Tuple{R1,R1}
     drag_distance::Tuple{R2,R2}
     zoom_factor::Real
-    params
+    params::Union{Nothing,<:NamedTuple}
 end
 
 function ICFractalCPU(;
@@ -34,7 +34,7 @@ function ICFractalCPU(;
     center::Complex{<:Real}=DEFAULT_CENTER,
     plane_size::Tuple{R1,R1}=DEFAULT_PLANE_SIZE,
     zoom_factor::Real=DEFAULT_ZOOM_FACTOR,
-    params=nothing,
+    params::Union{Nothing,<:NamedTuple}=nothing,
 )::ICFractalCPU where {
     S<:Integer,
     R1<:Real,
@@ -69,7 +69,7 @@ end
 function recalculate!(
     m::ICFractalCPU{C,I,R1,R2},
     color_map::F1,
-    calculation::F2,
+    calculation::F2
 ) where {C,I,R1,R2,F1<:Function,F2<:Function}
     img_size = R1.(size(m.img[]))
     @threads for i in axes(m.img[], 2)
@@ -78,7 +78,7 @@ function recalculate!(
                 -m.center.re + m.plane_size[1] * (j / img_size[1] - R1(1 / 2)),
                 m.center.im + m.plane_size[2] * (-i / img_size[2] + R1(1 / 2))
             )
-            @inbounds m.img[][j, i] = color_map(calculation(point, m.maxiter), m.maxiter)
+            @inbounds m.img[][j, i] = color_map(calculation(point, m.maxiter, m.params), m.maxiter)
         end
     end
     # this triggers update
@@ -89,5 +89,6 @@ end
 function recalculate!(m::ICFractalCPU{C,I,R1,R2}) where {C,I,R1,R2}
     recalculate!(m, m.color_map, m.calculation)
 end
+
 
 #= }}}=#

@@ -32,7 +32,7 @@ mutable struct ICFractal{
     coords_buffer::B1
     iters_in_buffer::B2
     iters_out_buffer::B3
-    params
+    params::Union{Nothing,<:NamedTuple}
 end
 
 function ICFractal(;
@@ -44,7 +44,7 @@ function ICFractal(;
     plane_size::Tuple{R2,R2}=DEFAULT_PLANE_SIZE,
     zoom_factor::Real=DEFAULT_ZOOM_FACTOR,
     coords_buffer::Union{<:AbstractMatrix{Complex{R1}},Nothing}=nothing,
-    params=nothing,
+    params::Union{Nothing,<:NamedTuple}=nothing
 )::ICFractal where {
     S<:Integer,
     R1<:Real,
@@ -135,11 +135,17 @@ function recalculate!(
     calculation::F,
     iters_in_buffer::Matrix{I},
     _::Matrix{I},
-    maxiter::I
+    maxiter::I,
+    params::Union{Nothing,<:NamedTuple}
 ) where {R<:Real,I<:Integer,F<:Function}
     @threads for i in eachindex(coords_buffer)
-        @inbounds iters_in_buffer[i] = calculation(coords_buffer[i], maxiter)
+        @inbounds iters_in_buffer[i] = calculation(coords_buffer[i], maxiter, params)
     end
+end
+
+function color!(f::ICFractal)
+    # for testing purposes
+    color!(f.color_map, f.img[], f.iters_out_buffer, f.maxiter)
 end
 
 function color!(
@@ -148,6 +154,7 @@ function color!(
     iters_buffer::Matrix{I},
     maxiter::I
 ) where {F<:Function,I<:Integer}
+    # scheduler can do this suprisingly well
     @threads for i in eachindex(iters_buffer)
         @inbounds img[i] = color_map(iters_buffer[i], maxiter)
     end
@@ -160,7 +167,8 @@ function recalculate!(f::ICFractal{C,I,R1,R2,B1,B2,B3}) where {C,I,R1,R2,B1,B2,B
         f.calculation,
         f.iters_in_buffer,
         f.iters_out_buffer,
-        f.maxiter
+        f.maxiter,
+        f.params
     )
     color!(f.color_map, f.img[], f.iters_out_buffer, f.maxiter)
     # trigger update
