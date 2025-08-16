@@ -6,10 +6,14 @@ function mandelbrot_calculation(
 )::I where {R<:Real,I<:Integer}
     point = start_point
     for i in I(0):maxiter-I(1)
-        if point.re * point.re + point.im * point.im >= R(4)
+        xs, ys = point.re * point.re, point.im * point.im
+        if xs + ys >= R(4)
             return i
         end
-        point = point * point + start_point
+        point = Complex(
+            xs - ys + start_point.re,
+            2 * point.re * point.im + start_point.im
+        )
     end
     return maxiter
 end
@@ -65,7 +69,7 @@ function test2_mandelbrot_calculation(
 )::I where {R<:Real,I<:Integer}
     point = start_point
     for i in I(0):maxiter-I(1)
-        if point.re * point.re + point.im * point.im >= R(4)
+        if point.re * point.re + point.im * point.im >= R(16)
             return i
         end
         re, im = point.re, point.im

@@ -28,7 +28,7 @@ mutable struct ICFractal{
     center::Complex{R1}
     plane_size::Tuple{R1,R1}
     drag_distance::Tuple{R2,R2}
-    zoom_factor::R2
+    zoom_factor::Real
     coords_buffer::B1
     iters_in_buffer::B2
     iters_out_buffer::B3
@@ -63,7 +63,7 @@ function ICFractal(;
         center,
         Tuple{R1,R1}(plane_size),
         (R2(0.0), R2(0.0)),
-        R2(zoom_factor),
+        zoom_factor,
         coords_buffer,
         iters_buffer,
         iters_buffer,

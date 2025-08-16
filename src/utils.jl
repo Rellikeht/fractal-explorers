@@ -65,7 +65,7 @@ const DEFAULT_MAXITER = 100
 const DEFAULT_COMPLEX_CENTER = 0.0 + 0im
 const DEFAULT_CENTER = 0.0 + 0im
 const DEFAULT_PLANE_SIZE = (1.6, 0.9) .* 2
-const DEFAULT_ZOOM_FACTOR = 1.1
+const DEFAULT_ZOOM_FACTOR = 1.2
 
 const ZOOM_ACTION = :scrollzoom
 const DRAG_ACTION = :dragmove

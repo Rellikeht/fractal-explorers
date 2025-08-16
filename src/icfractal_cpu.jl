@@ -22,7 +22,7 @@ mutable struct ICFractalCPU{
     center::Complex{R1}
     plane_size::Tuple{R1,R1}
     drag_distance::Tuple{R2,R2}
-    zoom_factor::R2
+    zoom_factor::Real
     params
 end
 
@@ -49,7 +49,7 @@ function ICFractalCPU(;
         center,
         Tuple{R1,R1}(plane_size),
         (R2(0.0), R2(0.0)),
-        R2(zoom_factor),
+        zoom_factor,
         params,
     )
 end
