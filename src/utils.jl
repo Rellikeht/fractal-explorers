@@ -114,4 +114,52 @@ macro supress_err(block)
     end
 end
 
+find_max_iter = let
+    _iters_freq_dict::Dict{Int64,Int64} = Dict()
+    # _sorted = []
+
+    function _find_max_iter(
+        buffer::AbstractArray{I},
+        min_occurrences::Integer,
+    ) where {I<:Integer}
+        empty!(_iters_freq_dict)
+        # empty!(_sorted)
+        for e in buffer
+            if haskey(_iters_freq_dict, e)
+                _iters_freq_dict[e] += 1
+            else
+                _iters_freq_dict[e] = 1
+            end
+        end
+        # sort!(_sorted)
+        first_max = maximum(keys(_iters_freq_dict))
+        while length(_iters_freq_dict) > 0
+            max_iter = maximum(keys(_iters_freq_dict))
+            if _iters_freq_dict[max_iter] >= min_occurrences
+                return max_iter
+            end
+            delete!(_iters_freq_dict, max_iter)
+        end
+        return first_max
+    end
+
+    function find_max_iter(
+        buffer::AbstractArray{I},
+        min_occurrences::Integer,
+    ) where {I<:Integer}
+        max_iter = _find_max_iter(buffer, min_occurrences)
+        if max_iter == 0
+            return 1
+        end
+        return max_iter
+    end
+
+    function find_max_iter(
+        buffer::AbstractArray{<:Integer},
+        min_occurrences::Real=0.0005,
+    )
+        find_max_iter(buffer, Int(round(length(buffer) * min_occurrences)))
+    end
+end
+
 #= }}}=#

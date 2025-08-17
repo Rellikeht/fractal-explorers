@@ -178,7 +178,7 @@ function color!(f::ICFractal)
             f.color_map,
             f.img[],
             f.iters_out_buffer,
-            maximum(f.iters_out_buffer)
+            find_max_iter(f.iters_out_buffer)
         )
     else
         color!(f.color_map, f.img[], f.iters_out_buffer, f.maxiter)

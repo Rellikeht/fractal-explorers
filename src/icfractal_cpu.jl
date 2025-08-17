@@ -141,7 +141,7 @@ function recalculate!(
             @inbounds iters_buffer[j, i] = calculation(point, maxiter, params)
         end
     end
-    img_max_iter = maximum(iters_buffer)
+    img_max_iter = find_max_iter(iters_buffer)
     @threads for i in eachindex(iters_buffer)
         @inbounds img[][i] = color_map(iters_buffer[i], img_max_iter)
     end
