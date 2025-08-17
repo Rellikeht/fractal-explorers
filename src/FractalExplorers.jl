@@ -5,6 +5,14 @@ export Observable, RGBf
 
 export
     AbstractFractal,
+    DEFAULT_CALCULATION,
+    DEFAULT_MAXITER,
+    DEFAULT_CENTER,
+    DEFAULT_PLANE_SIZE,
+    DEFAULT_VIEW_SIZE,
+    DEFAULT_ZOOM_FACTOR
+
+export
     default_hsv,
     reverse_hsv,
     simple_hsv,
@@ -14,14 +22,11 @@ export
     trippy,
     blue_hsv,
     blue_white,
+    blue_white_faded,
     blue_total_white,
-    DEFAULT_COLOR_MAP,
-    DEFAULT_CALCULATION,
-    DEFAULT_MAXITER,
-    DEFAULT_CENTER,
-    DEFAULT_PLANE_SIZE,
-    DEFAULT_VIEW_SIZE,
-    DEFAULT_ZOOM_FACTOR
+    blue_white_sqrt,
+    blue_white_log,
+    DEFAULT_COLOR_MAP
 
 export
     fractal!,
@@ -55,6 +60,7 @@ export
     change_maxiter!
 
 include("utils.jl")
+include("colors.jl")
 include("gui.jl")
 include("calculations.jl")
 include("icfractal_cpu.jl")

@@ -142,10 +142,12 @@ function recalculate!(
             @inbounds iters_buffer[j, i] = calculation(point, maxiter, params)
         end
     end
-    img_max_iter = find_max_iter(iters_buffer)
-    @threads for i in eachindex(iters_buffer)
-        @inbounds img[][i] = color_map(iters_buffer[i], img_max_iter)
-    end
+    color!(
+        color_map,
+        img[],
+        iters_buffer,
+        find_max_iter(iters_buffer)
+    )
     # this triggers update
     img[] = img[]
     nothing
@@ -153,7 +155,8 @@ end
 
 function recalculate!(f::ICFractalCPU)
     if f.iters_buffer === nothing ||
-       (hasproperty(f.params, :adaptive_coloring) && !f.params.adaptive_coloring)
+       !hasproperty(f.params, :adaptive_coloring) ||
+       !f.params.adaptive_coloring
         recalculate!(
             f.color_map,
             f.calculation,
