@@ -17,6 +17,12 @@ export
     reverse_hsv,
     simple_hsv,
     reverse_simple_hsv,
+    hsv_square,
+    holy_moly,
+    blue_yellow_white,
+    byrw,
+    showcase,
+    dark_showcase,
     black_white,
     white_black,
     trippy,
@@ -60,7 +66,7 @@ export
     change_maxiter!
 
 include("utils.jl")
-include("colors.jl")
+include("color_maps.jl")
 include("gui.jl")
 include("calculations.jl")
 include("icfractal_cpu.jl")

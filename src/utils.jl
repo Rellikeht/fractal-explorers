@@ -10,7 +10,6 @@ abstract type AbstractIFractal <: AbstractFractal end
 
 #= defaults {{{=#
 
-const DEFAULT_COLOR_MAP = default_hsv
 const DEFAULT_VIEW_SIZE = (1920, 1080)
 const DEFAULT_MAXITER = 100
 const DEFAULT_COMPLEX_CENTER = 0.0 + 0im

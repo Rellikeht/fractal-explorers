@@ -35,6 +35,74 @@ function reverse_hsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
     return HSV(hue, 0.8, iters != maxiter)
 end
 
+function holy_moly(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    start = 250
+    stop = -30
+    v = iters / maxiter
+    hue = start + (stop - start) * v
+    return HSV(hue, 0.9, v * v)
+end
+
+function hsv_square(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    start = 250
+    stop = -30
+    v = (iters / maxiter)^2
+    hue = start + (stop - start) * v
+    return HSV(hue, 0.8 + 0.2 * v, 1 - 0.2 * v)
+end
+
+function blue_yellow_white(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    q = iters / maxiter
+    h = q > 0.5 ? 36 : 240
+    s = abs(2 * q - 1)
+    s = s * sqrt(s)
+    v = 0.4 + 0.6 * sqrt(q)
+    return HSV(h, s, v)
+end
+
+function byrw(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    q = iters / maxiter
+    h = (q > 0.5) ? (10 + 40 * sqrt(2 - 2 * q)) : (240)
+    s = sqrt(abs(2 * q - 1))
+    s = s * sqrt(s)
+    v = 0.3 + 0.7 * sqrt(q)
+    return HSV(h, s, v)
+end
+
+function showcase(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    q = iters / maxiter
+    h = (q > 0.5) ? (10 + 40 * sqrt(2 - 2 * q)) : (240)
+    s = sqrt(abs(2 * q - 1))
+    s = s * sqrt(s)
+    v = 0.3 + 0.7 * log2(log2(log2(q + 1) + 1) + 1)
+    return HSV(h, s, v)
+end
+
+function dark_showcase(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    q = iters / maxiter
+    h = (q > 0.5) ? (10 + 40 * sqrt(2 - 2 * q)) : (240)
+    s = sqrt(abs(2 * q - 1))
+    s = s * sqrt(s)
+    v = (q > 0.5) ? 2 * q * sqrt(1/2) * sqrt(q) : (2 * q * q)
+    v = 0.3 + 0.7 * log2(v + 1)
+    return HSV(h, s, v)
+end
+
 function trippy(iters::I, maxiter::I)::RGBf where {I<:Integer}
     return HSV(
         (maxiter - iters) / (iters + 1) * 360,
@@ -83,3 +151,5 @@ function blue_white_log(iters::I, maxiter::I)::RGBf where {I<:Integer}
     v = log2(1 + iters / maxiter)
     return HSV(240, 1 - v, 0.2 + 0.8 * v)
 end
+
+const DEFAULT_COLOR_MAP = default_hsv
