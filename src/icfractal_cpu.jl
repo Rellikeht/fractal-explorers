@@ -142,11 +142,15 @@ function recalculate!(
             @inbounds iters_buffer[j, i] = calculation(point, maxiter, params)
         end
     end
+    img_maxiter = find_max_iter(iters_buffer)
+    if img_maxiter === nothing
+        img_maxiter = maxiter
+    end
     color!(
         color_map,
         img[],
         iters_buffer,
-        find_max_iter(iters_buffer)
+        img_maxiter,
     )
     # this triggers update
     img[] = img[]

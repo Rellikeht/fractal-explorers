@@ -49,8 +49,9 @@ end
 
 find_max_iter = let
     # heuristics that look ok
-    DEFAULT_MIN_OCCURRENCES = 0.00005
-    DEFAULT_MIN_MAX_ITER = 20
+    DEFAULT_MIN_OCCURRENCES = 0.0005
+    DEFAULT_ITER_DIFFERENCE = 1
+    DEFAULT_MAX_ITER = 10
     _iters_freq_dict::Dict{Int,Int} = Dict()
     # _sorted = []
 
@@ -68,32 +69,35 @@ find_max_iter = let
             end
         end
         # sort!(_sorted)
-        first_max = maximum(keys(_iters_freq_dict))
-        while length(_iters_freq_dict) > 0
-            max_iter = maximum(keys(_iters_freq_dict))
-            if _iters_freq_dict[max_iter] >= min_occurrences
-                return max_iter
+        max_iter = maximum(_iters_freq_dict)
+        first_max = max_iter.first
+        while true
+            if max_iter.second >= min_occurrences
+                return max_iter.first
+            elseif length(_iters_freq_dict) > 0
+                return first_max
             end
-            delete!(_iters_freq_dict, max_iter)
+            max_iter = maximum(_iters_freq_dict)
+            delete!(_iters_freq_dict, max_iter.first)
         end
-        return first_max
     end
 
     function find_max_iter(
         buffer::AbstractArray{I},
         min_occurrences::Integer,
-    )::I where {I<:Integer}
+    )::Union{Nothing,I} where {I<:Integer}
         max_iter = _find_max_iter(buffer, min_occurrences)
-        if max_iter < DEFAULT_MIN_MAX_ITER
-            return DEFAULT_MIN_MAX_ITER
+        if max_iter <= DEFAULT_MAX_ITER ||
+           max_iter - minimum(buffer) <= DEFAULT_ITER_DIFFERENCE
+            return nothing
         end
         return max_iter
     end
 
     function find_max_iter(
-        buffer::AbstractArray{I},
+        buffer::AbstractArray{<:Integer},
         min_occurrences::Real=DEFAULT_MIN_OCCURRENCES,
-    )::I where {I<:Integer}
+    )
         find_max_iter(buffer, Int(round(length(buffer) * min_occurrences)))
     end
 end
