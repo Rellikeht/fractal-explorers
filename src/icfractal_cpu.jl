@@ -22,6 +22,7 @@ mutable struct ICFractalCPU{
     calculation::F2 where {F2<:Function}
     img::Observable{Matrix{C}}
     maxiter::I
+    iters_buffer::Union{Nothing,Matrix{I}}
     center::Complex{R1}
     plane_size::Tuple{R1,R1}
     drag_distance::Tuple{R2,R2}
@@ -34,6 +35,7 @@ function ICFractalCPU(;
     calculation::F2 where {F2<:Function}=DEFAULT_CALCULATION,
     view_size::Tuple{S,S}=DEFAULT_VIEW_SIZE,
     maxiter::Integer=DEFAULT_MAXITER,
+    iters_buffer::Bool=false,
     center::Complex{<:Real}=DEFAULT_CENTER,
     plane_size::Tuple{R1,R1}=DEFAULT_PLANE_SIZE,
     zoom_factor::Real=DEFAULT_ZOOM_FACTOR,
@@ -49,6 +51,7 @@ function ICFractalCPU(;
         calculation,
         img,
         maxiter,
+        iters_buffer ? fill(typeof(maxiter)(0), view_size) : nothing,
         center,
         Tuple{R1,R1}(plane_size),
         (R2(0.0), R2(0.0)),
@@ -118,16 +121,59 @@ function recalculate!(
     nothing
 end
 
-function recalculate!(m::ICFractalCPU)
-    recalculate!(
-        m.color_map,
-        m.calculation,
-        m.center,
-        m.img,
-        m.maxiter,
-        m.plane_size,
-        m.params
-    )
+function recalculate!(
+    color_map::F1,
+    calculation::F2,
+    center::Complex{R1},
+    img::Observable{<:Matrix{<:Color}},
+    maxiter::I,
+    iters_buffer::Matrix{I},
+    plane_size::Tuple{R2,R2},
+    params::Union{Nothing,<:NamedTuple}
+) where {F1<:Function,F2<:Function,I<:Integer,R1<:Real,R2<:Real}
+    img_size = R1.(size(img[]))
+    @threads for i in axes(img[], 2)
+        for j in axes(img[], 1)
+            point = Complex{R1}(
+                -center.re + plane_size[1] * (j / img_size[1] - R1(1 / 2)),
+                center.im + plane_size[2] * (-i / img_size[2] + R1(1 / 2))
+            )
+            @inbounds iters_buffer[j, i] = calculation(point, maxiter, params)
+        end
+    end
+    img_max_iter = maximum(iters_buffer)
+    @threads for i in eachindex(iters_buffer)
+        @inbounds img[][i] = color_map(iters_buffer[i], img_max_iter)
+    end
+    # this triggers update
+    img[] = img[]
+    nothing
+end
+
+function recalculate!(f::ICFractalCPU)
+    if f.iters_buffer === nothing ||
+       (hasproperty(f.params, :adaptive_coloring) && !f.params.adaptive_coloring)
+        recalculate!(
+            f.color_map,
+            f.calculation,
+            f.center,
+            f.img,
+            f.maxiter,
+            f.plane_size,
+            f.params
+        )
+    else
+        recalculate!(
+            f.color_map,
+            f.calculation,
+            f.center,
+            f.img,
+            f.maxiter,
+            f.iters_buffer,
+            f.plane_size,
+            f.params
+        )
+    end
 end
 
 #= }}}=#

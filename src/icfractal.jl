@@ -173,7 +173,16 @@ end
 
 function color!(f::ICFractal)
     # for testing purposes
-    color!(f.color_map, f.img[], f.iters_out_buffer, f.maxiter)
+    if hasproperty(f.params, :adaptive_coloring) && f.params.adaptive_coloring
+        color!(
+            f.color_map,
+            f.img[],
+            f.iters_out_buffer,
+            maximum(f.iters_out_buffer)
+        )
+    else
+        color!(f.color_map, f.img[], f.iters_out_buffer, f.maxiter)
+    end
 end
 
 function color!(
@@ -199,7 +208,7 @@ function recalculate!(f::ICFractal)
         f.maxiter,
         f.params
     )
-    color!(f.color_map, f.img[], f.iters_out_buffer, f.maxiter)
+    color!(f)
     # trigger update
     f.img[] = f.img[]
     nothing

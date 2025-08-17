@@ -11,7 +11,11 @@ function mandelbrot_calculation(
     maxiter::Integer,
     params::NamedTuple,
 )
-    mandelbrot_calculation(start_point, maxiter, params.start)
+    mandelbrot_calculation(
+        start_point,
+        maxiter,
+        hasproperty(params, :start) ? params.start : nothing
+    )
 end
 
 function mandelbrot_calculation(
@@ -69,7 +73,7 @@ function test2_mandelbrot_calculation(
     test2_mandelbrot_calculation(
         calculated_point,
         maxiter,
-        params.start
+        hasproperty(params, :start) ? params.start : nothing
     )
 end
 
@@ -130,7 +134,7 @@ function drunkenbrot_calculation(
     drunkenbrot_calculation(
         calculated_point,
         maxiter,
-        params.start
+        hasproperty(params, :start) ? params.start : nothing
     )
 end
 
