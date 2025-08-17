@@ -29,7 +29,7 @@ end
 function mandelbrot_calculation(
     start_point::Complex,
     maxiter::Integer,
-    start::Number
+    start::Number,
 )
     mandelbrot_calculation(start_point, maxiter, typeof(start_point)(start))
 end
@@ -37,8 +37,8 @@ end
 function mandelbrot_calculation(
     calculated_point::Complex{R},
     maxiter::I,
-    start_point::Complex{R}
-) where {R<:Real,I<:Integer}
+    start_point::Complex{R},
+)::I where {R<:Real,I<:Integer}
     point = calculated_point + start_point
     for i in I(0):maxiter-I(1)
         xs, ys = point.re * point.re, point.im * point.im
@@ -68,7 +68,7 @@ const DEFAULT_CALCULATION = mandelbrot_calculation
 function test2_mandelbrot_calculation(
     calculated_point::Complex,
     maxiter::Integer,
-    params::NamedTuple
+    params::NamedTuple,
 )
     test2_mandelbrot_calculation(
         calculated_point,
@@ -80,7 +80,7 @@ end
 function test2_mandelbrot_calculation(
     calculated_point::Complex,
     maxiter::Integer,
-    _::Nothing
+    _::Nothing,
 )
     test2_mandelbrot_calculation(
         calculated_point,
@@ -92,7 +92,7 @@ end
 function test2_mandelbrot_calculation(
     calculated_point::Complex,
     maxiter::Integer,
-    start::Number
+    start::Number,
 )
     test2_mandelbrot_calculation(
         calculated_point,
@@ -105,7 +105,7 @@ end
 function test2_mandelbrot_calculation(
     calculated_point::Complex{R},
     maxiter::I,
-    start_point::Complex{R}
+    start_point::Complex{R},
 )::I where {R<:Real,I<:Integer}
     # start only moves this
     point = calculated_point + start_point
@@ -129,7 +129,7 @@ end
 function drunkenbrot_calculation(
     calculated_point::Complex,
     maxiter::Integer,
-    params::NamedTuple
+    params::NamedTuple,
 )
     drunkenbrot_calculation(
         calculated_point,
@@ -141,7 +141,7 @@ end
 function drunkenbrot_calculation(
     calculated_point::Complex,
     maxiter::Integer,
-    _::Nothing
+    _::Nothing,
 )
     drunkenbrot_calculation(
         calculated_point,
@@ -153,7 +153,7 @@ end
 function drunkenbrot_calculation(
     calculated_point::Complex,
     maxiter::Integer,
-    start::Number
+    start::Number,
 )
     drunkenbrot_calculation(
         calculated_point,
@@ -165,7 +165,7 @@ end
 function drunkenbrot_calculation(
     calculated_point::Complex{R},
     maxiter::I,
-    start_point::Complex{R}
+    start_point::Complex{R},
 )::I where {R<:Real,I<:Integer}
     point = calculated_point + start_point
     for i in I(0):maxiter-I(1)
@@ -187,7 +187,7 @@ end
 function test1_mandelbrot_calculation(
     start_point::Complex{R},
     maxiter::I,
-    _=nothing
+    _::Union{Nothing,<:NamedTuple}=nothing,
 )::I where {R<:Real,I<:Integer}
     point = start_point
     for i in I(0):maxiter-I(1)
@@ -206,7 +206,7 @@ end
 function test3_mandelbrot_calculation(
     start_point::Complex{R},
     maxiter::I,
-    _=nothing
+    _::Union{Nothing,<:NamedTuple}=nothing,
 )::I where {R<:Real,I<:Integer}
     point = start_point
     for i in I(0):maxiter-I(1)
@@ -225,7 +225,7 @@ end
 function test4_mandelbrot_calculation(
     start_point::Complex{R},
     maxiter::I,
-    _=nothing
+    _::Union{Nothing,<:NamedTuple}=nothing,
 )::I where {R<:Real,I<:Integer}
     point = start_point
     for i in I(0):maxiter-I(1)

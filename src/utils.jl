@@ -115,13 +115,16 @@ macro supress_err(block)
 end
 
 find_max_iter = let
-    _iters_freq_dict::Dict{Int64,Int64} = Dict()
+    # heuristics that look ok
+    DEFAULT_MIN_OCCURRENCES = 0.00005
+    DEFAULT_MIN_MAX_ITER = 20
+    _iters_freq_dict::Dict{Int,Int} = Dict()
     # _sorted = []
 
     function _find_max_iter(
         buffer::AbstractArray{I},
         min_occurrences::Integer,
-    ) where {I<:Integer}
+    )::I where {I<:Integer}
         empty!(_iters_freq_dict)
         # empty!(_sorted)
         for e in buffer
@@ -146,18 +149,18 @@ find_max_iter = let
     function find_max_iter(
         buffer::AbstractArray{I},
         min_occurrences::Integer,
-    ) where {I<:Integer}
+    )::I where {I<:Integer}
         max_iter = _find_max_iter(buffer, min_occurrences)
-        if max_iter == 0
-            return 1
+        if max_iter < DEFAULT_MIN_MAX_ITER
+            return DEFAULT_MIN_MAX_ITER
         end
         return max_iter
     end
 
     function find_max_iter(
-        buffer::AbstractArray{<:Integer},
-        min_occurrences::Real=0.0005,
-    )
+        buffer::AbstractArray{I},
+        min_occurrences::Real=DEFAULT_MIN_OCCURRENCES,
+    )::I where {I<:Integer}
         find_max_iter(buffer, Int(round(length(buffer) * min_occurrences)))
     end
 end

@@ -70,6 +70,7 @@ function transform_float_type(
         f.calculation,
         Observable(f.img[][:, :]),
         f.maxiter,
+        f.iters_buffer[:, :],
         new_type(f.center),
         R.(f.plane_size),
         f.drag_distance,
