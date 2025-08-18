@@ -76,7 +76,7 @@ function transform_float_type(
     new_type::Type{<:Complex{R}} where {R<:Real}
 )::ICFractal
     R = new_type.parameters[1]
-    ICFractal(
+    return ICFractal(
         f.color_map,
         f.calculation,
         Observable(f.img[][:, :]),

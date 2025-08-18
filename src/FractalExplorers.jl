@@ -18,6 +18,7 @@ export
     simple_hsv,
     reverse_simple_hsv,
     hsv_square,
+    hsv_square_dark,
     holy_moly,
     blue_yellow_white,
     byrw,

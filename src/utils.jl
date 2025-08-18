@@ -11,7 +11,8 @@ abstract type AbstractIFractal <: AbstractFractal end
 #= defaults {{{=#
 
 const DEFAULT_VIEW_SIZE = (1920, 1080)
-const DEFAULT_MAXITER = 100
+# just in case some gpu or vector extension isn't suited for full Ints
+const DEFAULT_MAXITER = Int32(100)
 const DEFAULT_COMPLEX_CENTER = 0.0 + 0im
 const DEFAULT_CENTER = 0.0 + 0im
 const DEFAULT_PLANE_SIZE = (1.6, 0.9) .* 2
@@ -61,11 +62,7 @@ find_max_iter = let
         empty!(_iters_freq_dict)
         # empty!(_sorted)
         for e in buffer
-            if haskey(_iters_freq_dict, e)
-                _iters_freq_dict[e] += 1
-            else
-                _iters_freq_dict[e] = 1
-            end
+            _iters_freq_dict[e] = get(_iters_freq_dict, e, 0) + 1
         end
         # sort!(_sorted)
         max_iter = maximum(_iters_freq_dict)

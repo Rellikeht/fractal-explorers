@@ -1,3 +1,5 @@
+# linear {{{
+
 function simple_hsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
     if iters == maxiter
         return RGBf(0, 0, 0)
@@ -35,6 +37,35 @@ function reverse_hsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
     return HSV(hue, 0.8, iters != maxiter)
 end
 
+function blue_hsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    return HSV(240, 0.8, 0.1 + 0.9 * iters / maxiter)
+end
+
+function blue_white(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    return HSV(240, 1 - iters / maxiter, 0.2 + 0.8 * iters / maxiter)
+end
+
+function blue_white_faded(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    return HSV(240, 0.8 - 0.8 * iters / maxiter, 0.1 + 0.8 * iters / maxiter)
+end
+
+function blue_total_white(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    return HSV(240, 0.8 - 0.8 * iters / maxiter, 0.1 + 0.8 * iters / maxiter)
+end
+
+#  }}}
+
+# square/sqrt {{{
+
 function holy_moly(iters::I, maxiter::I)::RGBf where {I<:Integer}
     start = 250
     stop = -30
@@ -52,6 +83,19 @@ function hsv_square(iters::I, maxiter::I)::RGBf where {I<:Integer}
     v = (iters / maxiter)^2
     hue = start + (stop - start) * v
     return HSV(hue, 0.8 + 0.2 * v, 1 - 0.2 * v)
+end
+
+function hsv_square_dark(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    start = 250
+    stop = -30
+    v = (iters / maxiter)
+    value = 0.05 +  0.85 * sqrt(sqrt(v))
+    v = v * v
+    hue = start + (stop - start) * v
+    return HSV(hue, 0.8 + 0.2 * v, value)
 end
 
 function blue_yellow_white(iters::I, maxiter::I)::RGBf where {I<:Integer}
@@ -78,6 +122,18 @@ function byrw(iters::I, maxiter::I)::RGBf where {I<:Integer}
     return HSV(h, s, v)
 end
 
+function blue_white_sqrt(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    v = sqrt(iters / maxiter)
+    return HSV(240, 1 - v, 0.2 + 0.8 * v)
+end
+
+#  }}}
+
+# log {{{
+
 function showcase(iters::I, maxiter::I)::RGBf where {I<:Integer}
     if iters == maxiter
         return RGBf(0, 0, 0)
@@ -103,6 +159,18 @@ function dark_showcase(iters::I, maxiter::I)::RGBf where {I<:Integer}
     return HSV(h, s, v)
 end
 
+function blue_white_log(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    if iters == maxiter
+        return RGBf(0, 0, 0)
+    end
+    v = log2(1 + iters / maxiter)
+    return HSV(240, 1 - v, 0.2 + 0.8 * v)
+end
+
+#  }}}
+
+# other {{{
+
 function trippy(iters::I, maxiter::I)::RGBf where {I<:Integer}
     return HSV(
         (maxiter - iters) / (iters + 1) * 360,
@@ -111,45 +179,6 @@ function trippy(iters::I, maxiter::I)::RGBf where {I<:Integer}
     )
 end
 
-function blue_hsv(iters::I, maxiter::I)::RGBf where {I<:Integer}
-    if iters == maxiter
-        return RGBf(0, 0, 0)
-    end
-    return HSV(240, 0.8, 0.1 + 0.9 * iters / maxiter)
-end
-
-function blue_white(iters::I, maxiter::I)::RGBf where {I<:Integer}
-    if iters == maxiter
-        return RGBf(0, 0, 0)
-    end
-    return HSV(240, 1 - iters / maxiter, 0.2 + 0.8 * iters / maxiter)
-end
-
-function blue_white_faded(iters::I, maxiter::I)::RGBf where {I<:Integer}
-    if iters == maxiter
-        return RGBf(0, 0, 0)
-    end
-    return HSV(240, 0.8 - 0.8 * iters / maxiter, 0.1 + 0.8 * iters / maxiter)
-end
-
-function blue_total_white(iters::I, maxiter::I)::RGBf where {I<:Integer}
-    return HSV(240, 0.8 - 0.8 * iters / maxiter, 0.1 + 0.8 * iters / maxiter)
-end
-
-function blue_white_sqrt(iters::I, maxiter::I)::RGBf where {I<:Integer}
-    if iters == maxiter
-        return RGBf(0, 0, 0)
-    end
-    v = sqrt(iters / maxiter)
-    return HSV(240, 1 - v, 0.2 + 0.8 * v)
-end
-
-function blue_white_log(iters::I, maxiter::I)::RGBf where {I<:Integer}
-    if iters == maxiter
-        return RGBf(0, 0, 0)
-    end
-    v = log2(1 + iters / maxiter)
-    return HSV(240, 1 - v, 0.2 + 0.8 * v)
-end
+#  }}}
 
 const DEFAULT_COLOR_MAP = default_hsv

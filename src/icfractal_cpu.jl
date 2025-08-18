@@ -65,7 +65,7 @@ function transform_float_type(
     new_type::Type{<:Complex{R}} where {R<:Real}
 )::ICFractalCPU
     R = new_type.parameters[1]
-    ICFractalCPU(
+    return ICFractalCPU(
         f.color_map,
         f.calculation,
         Observable(f.img[][:, :]),
@@ -117,9 +117,6 @@ function recalculate!(
             @inbounds img[][j, i] = color_map(calculation(point, maxiter, params), maxiter)
         end
     end
-    # this triggers update
-    img[] = img[]
-    nothing
 end
 
 function recalculate!(
@@ -155,9 +152,6 @@ function recalculate!(
         iters_buffer,
         img_maxiter,
     )
-    # this triggers update
-    img[] = img[]
-    nothing
 end
 
 function recalculate!(f::ICFractalCPU)
@@ -183,6 +177,9 @@ function recalculate!(f::ICFractalCPU)
             f.params
         )
     end
+    # trigger update
+    f.img[] = f.img[]
+    nothing
 end
 
 #= }}}=#

@@ -68,11 +68,7 @@ function transform_float_type(
     ax::Axis,
     new_type::Type{<:Number}
 )::AbstractFractal
-    new_fractal = transform_float_type(
-        get_fractal(ax),
-        new_type
-    )
-    return new_fractal
+    transform_float_type(get_fractal(ax), new_type)
 end
 
 function transform_float_type!(
