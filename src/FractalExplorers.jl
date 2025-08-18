@@ -20,6 +20,8 @@ export
     hsv_square,
     hsv_square_dark,
     holy_moly,
+    holier_moly,
+    pink_storm,
     blue_yellow_white,
     byrw,
     showcase,

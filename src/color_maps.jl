@@ -66,14 +66,6 @@ end
 
 # square/sqrt {{{
 
-function holy_moly(iters::I, maxiter::I)::RGBf where {I<:Integer}
-    start = 250
-    stop = -30
-    v = iters / maxiter
-    hue = start + (stop - start) * v
-    return HSV(hue, 0.9, v * v)
-end
-
 function hsv_square(iters::I, maxiter::I)::RGBf where {I<:Integer}
     if iters == maxiter
         return RGBf(0, 0, 0)
@@ -92,7 +84,7 @@ function hsv_square_dark(iters::I, maxiter::I)::RGBf where {I<:Integer}
     start = 250
     stop = -30
     v = (iters / maxiter)
-    value = 0.05 +  0.85 * sqrt(sqrt(v))
+    value = 0.05 + 0.85 * sqrt(sqrt(v))
     v = v * v
     hue = start + (stop - start) * v
     return HSV(hue, 0.8 + 0.2 * v, value)
@@ -154,7 +146,7 @@ function dark_showcase(iters::I, maxiter::I)::RGBf where {I<:Integer}
     h = (q > 0.5) ? (10 + 40 * sqrt(2 - 2 * q)) : (240)
     s = sqrt(abs(2 * q - 1))
     s = s * sqrt(s)
-    v = (q > 0.5) ? 2 * q * sqrt(1/2) * sqrt(q) : (2 * q * q)
+    v = (q > 0.5) ? 2 * q * sqrt(1 / 2) * sqrt(q) : (2 * q * q)
     v = 0.3 + 0.7 * log2(v + 1)
     return HSV(h, s, v)
 end
@@ -177,6 +169,30 @@ function trippy(iters::I, maxiter::I)::RGBf where {I<:Integer}
         0.8,
         iters != maxiter,
     )
+end
+
+function holy_moly(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    start = 250
+    stop = -30
+    v = iters / maxiter
+    hue = start + (stop - start) * v
+    return HSV(hue, 0.9, v * v)
+end
+
+function holier_moly(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    start = 250
+    stop = -30
+    v = iters / maxiter
+    hue = start + (stop - start) * v
+    return HSV(hue, 0.9, 0.05 + 0.95 * v)
+end
+
+function pink_storm(iters::I, maxiter::I)::RGBf where {I<:Integer}
+    start = 250
+    stop = -30
+    v = iters / maxiter
+    hue = start + (stop - start) * v
+    return HSV(hue, 0.9, 0.9 * sqrt(v))
 end
 
 #  }}}
