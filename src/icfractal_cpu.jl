@@ -36,8 +36,8 @@ function ICFractalCPU(;
     view_size::Tuple{S,S}=DEFAULT_VIEW_SIZE,
     maxiter::Integer=DEFAULT_MAXITER,
     iters_buffer::Bool=false,
-    center::Complex{<:Real}=DEFAULT_CENTER,
-    plane_size::Tuple{R1,R1}=DEFAULT_PLANE_SIZE,
+    center::Complex{R1}=DEFAULT_CENTER,
+    plane_size::Tuple{R2,R2} where {R2<:Real}=DEFAULT_PLANE_SIZE,
     zoom_factor::Real=DEFAULT_ZOOM_FACTOR,
     params::Union{Nothing,<:NamedTuple}=nothing,
 )::ICFractalCPU where {

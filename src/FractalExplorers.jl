@@ -38,12 +38,12 @@ export
     DEFAULT_COLOR_MAP
 
 export
+    FractalGUI,
     fractal!,
     move!,
     zoom!,
     reset!,
     change_maxiter!,
-    transform_float_type,
     transform_float_type!,
     simple_setup,
     advanced_setup,

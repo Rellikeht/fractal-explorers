@@ -9,9 +9,6 @@ const DEFAULT_MAX_ITERS = 100000
 
 #= basics {{{=#
 
-abstract type AbstractGUI end
-abstract type AbstractGUIElement end
-
 mutable struct Block{N}
     block::Makie.Block
     installers::NTuple{N,<:Function}
@@ -23,7 +20,7 @@ end
 Element of GUI for fractal explorations.
 Contains every gui widget that somehow corresponds to given fractal.
 "
-mutable struct FractalElem <: AbstractGUIElement
+mutable struct FractalGElement
     "axis where fractal is drawn"
     axis::Axis
     "fractal object"
@@ -33,34 +30,22 @@ mutable struct FractalElem <: AbstractGUIElement
 end
 
 "GUI for fractal explorations"
-struct FractalGUI{NT<:NamedTuple} <: AbstractGUI
+struct FractalGUI{NT<:NamedTuple}
     "figure inside which whole gui lives"
     figure::Figure
-    "elements of type `FractalElem`"
+    "elements of type FractalGElement"
     elements::NT
 end
 
-function apply_installers(block::Block)
-    apply_installers(block.block, block.installers, block.args)
-end
-
-function apply_installers(
-    block::Makie.Block,
-    installers::NTuple{N,<:Function},
-    args::NTuple{N,<:Any},
-) where {N}
-    ((f, block, args) -> f(block, args...)).(installers, block, args)
-end
-
-
 function Block(
     block::Makie.Block,
+    fractal::AbstractFractal,
     installers::NTuple{N,<:Function},
     args::Union{<:NTuple{N,<:Any},Nothing}=nothing,
 ) where {N}
     block_args::NTuple{N,<:Any} =
         if args === nothing
-            (((nothing,) for _ in 1:N)...,)
+            ((() for _ in 1:N)...,)
         else
             conversion = function (e)
                 if e === nothing
@@ -77,7 +62,7 @@ function Block(
         block,
         installers,
         block_args,
-        apply_installers(block, installers, block_args)
+        apply_installers(block, fractal, installers, block_args)
     )
 end
 
@@ -85,26 +70,44 @@ function GLMakie.display(gui::FractalGUI)
     display(gui.figure)
 end
 
-# function get_name(ax::Axis)::Symbol
-#     return ax.interactions[:name][2]()
-# end
-
 #= }}}=#
 
 #= helpers {{{=#
 
-# function get_fractal(ax::Axis)::AbstractFractal
-#     return ax.interactions[:fractal][2]()
-# end
+function apply_installers(
+    block::Makie.Block,
+    fractal::AbstractFractal,
+    installers::NTuple{N,<:Function},
+    args::NTuple{N,<:Any},
+) where {N}
+    apply = (f, block, fractal, args) -> f(block, fractal, args...)
+    return apply.(installers, (block,), (fractal,), args)
+end
 
-# function get_slider(ax::Axis)
-#     ax.parent.content[]
-#     # TODO
-# end
+function apply_installers(block::Block, fractal::AbstractFractal)
+    apply_installers(block.block, fractal, block.installers, block.args)
+end
 
-# function get_button(ax::Axis)
-#     # TODO
-# end
+function apply_installers(element::FractalGElement)
+    for block in element.blocks
+        apply_installers(block, element.fractal)
+    end
+end
+
+function apply_installers!(block::Block, fractal::AbstractFractal)
+    block.observer_functions = apply_installers(
+        block.block,
+        fractal,
+        block.installers,
+        block.args
+    )
+end
+
+function apply_installers!(element::FractalGElement)
+    for block in element.blocks
+        apply_installers!(block, element.fractal)
+    end
+end
 
 #= }}}=#
 
@@ -157,21 +160,28 @@ function change_maxiter!(
     end
 end
 
-function transform_float_type(
-    ax::Axis,
+function transform_float_type!(
+    element::FractalGElement,
     new_type::Type{<:Number}
-)::AbstractFractal
-    transform_float_type(get_fractal(ax), new_type)
+)
+    new_fractal = transform_float_type(element.fractal, new_type)
+    fractal!(element, new_fractal; refresh=true, reinstall=true)
+    return new_fractal
 end
 
 function transform_float_type!(
-    ax::Axis,
+    gui::FractalGUI,
+    name::Symbol,
     new_type::Type{<:Number}
-)::AbstractFractal
-    new_fractal = transform_float_type(ax, new_type)
-    fractal!(ax, new_fractal; refresh=true)
-    # TODO maxiter slider doesn't work
-    return new_fractal
+)
+    return transform_float_type!(gui.elements[name], new_type)
+end
+
+function transform_float_type!(
+    gui::FractalGUI,
+    new_type::Type{<:Number}
+)
+    return transform_float_type!.(gui.elements, (new_type,))
 end
 
 #= }}}=#
@@ -199,7 +209,7 @@ function simple_setup(fractal::AbstractFractal)::FractalGUI
     fig = figure(fractal, figure_padding=0)
     ax = Axis(fig[1, 1])
     clean_axis!(ax)
-    main = FractalElem(ax, fractal, ())
+    main = FractalGElement(ax, fractal, ())
     return FractalGUI(fig, (main=main,))
 end
 
@@ -242,27 +252,30 @@ function advanced_setup(
     )
 
     on_reset_installer =
-        (button, fractal) -> on(_ -> reset!(fractal), button.clicks)
+        (b, f) -> on(_ -> reset!(f), b.clicks; weak=true)
     on_change_installer =
-        (slider_grid, fractal, calc_maxiter) ->
+        (sg, f, c) ->
             on(
-                change_maxiter!(fractal, calc_maxiter),
-                slider_grid.sliders[1].value
+                change_maxiter!(f, c),
+                sg.sliders[1].value;
+                weak=true
             )
     button_block = Block(
         b,
+        fractal,
         (on_reset_installer,),
-        ((fractal,),)
+        nothing,
     )
     slider_block = Block(
         sl,
+        fractal,
         (on_change_installer,),
-        ((fractal, calc_maxiter),)
+        ((calc_maxiter,),)
     )
 
     rowsize!(sl.layout, 1, Relative(0.95))
     clean_axis!(ax)
-    main = FractalElem(ax, fractal, (button_block, slider_block))
+    main = FractalGElement(ax, fractal, (button_block, slider_block))
     return FractalGUI(fig, (main=main,))
 end
 
@@ -287,7 +300,6 @@ end
 
 function fractal!(
     ax::Axis,
-    # name::Symbol,
     fractal::AbstractFractal;
     refresh::Bool=false,
     static::Bool=false
@@ -308,7 +320,6 @@ function fractal!(
             deregister_interaction!(ax, interaction)
         end
     end
-    # register_interaction!(() -> name, ax, NAME_ACTION)
     if !static
         register_interaction!(zoom!(fractal), ax, ZOOM_ACTION)
         register_interaction!(move!(fractal), ax, DRAG_ACTION)
@@ -319,25 +330,49 @@ function fractal!(
 end
 
 function fractal!(
-    gui::FractalGUI;
+    element::FractalGElement;
     refresh::Bool=false,
     reinstall::Bool=true,
     kw_args...
 )
-    for (name, element) in pairs(gui.elements)
-        fractal!(
-            element.axis,
-            # name,
-            element.fractal;
-            refresh=refresh,
-            kw_args...
-        )
-        if reinstall
-            for block in element.blocks
-                apply_installers(block)
-            end
-        end
+    fractal!(
+        element.axis,
+        element.fractal;
+        refresh=refresh,
+        kw_args...
+    )
+    if reinstall
+        apply_installers!(element)
     end
+end
+
+function fractal!(gui::FractalGUI, name::Symbol; kw_args...)
+    fractal!(gui, gui.elements[name]; kw_args...)
+end
+
+function fractal!(gui::FractalGUI; kw_args...)
+    for element in gui.elements
+        fractal!(element; kw_args...)
+    end
+end
+
+function fractal!(
+    element::FractalGElement,
+    fractal::AbstractFractal;
+    kw_args...
+)
+    element.fractal = fractal
+    fractal!(element; kw_args...)
+end
+
+function fractal!(
+    gui::FractalGUI,
+    name::Symbol,
+    fractal::AbstractFractal;
+    kw_args...
+)
+    gui.elements[name].fractal = fractal
+    fractal!(gui.elements[name]; kw_args...)
 end
 
 #= }}}=#
