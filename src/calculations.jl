@@ -9,21 +9,13 @@
 function mandelbrot_calculation(
     start_point::Complex,
     maxiter::Integer,
-    params::NamedTuple,
+    params::Union{<:NamedTuple,Nothing},
 )
     mandelbrot_calculation(
         start_point,
         maxiter,
-        hasproperty(params, :start) ? params.start : nothing
+        hasproperty(params, :start) ? params.start : typeof(start_point)(0, 0)
     )
-end
-
-function mandelbrot_calculation(
-    start_point::Complex,
-    maxiter::Integer,
-    _::Nothing,
-)
-    mandelbrot_calculation(start_point, maxiter, typeof(start_point)(0, 0))
 end
 
 function mandelbrot_calculation(
@@ -58,6 +50,49 @@ const DEFAULT_CALCULATION = mandelbrot_calculation
 #= }}}=#
 
 #= TODO julia calculation {{{=#
+
+#= }}}=#
+
+#= other {{{=#
+
+function tricorn_calculation(
+    start_point::Complex,
+    maxiter::Integer,
+    params::Union{<:NamedTuple,Nothing},
+)
+    tricorn_calculation(
+        start_point,
+        maxiter,
+        hasproperty(params, :start) ? params.start : typeof(start_point)(0, 0)
+    )
+end
+
+function tricorn_calculation(
+    start_point::Complex,
+    maxiter::Integer,
+    start::Number,
+)
+    tricorn_calculation(start_point, maxiter, typeof(start_point)(start))
+end
+
+function tricorn_calculation(
+    calculated_point::Complex{R},
+    maxiter::I,
+    start_point::Complex{R},
+)::I where {R<:Real,I<:Integer}
+    point = calculated_point + start_point
+    for i in I(0):maxiter-I(1)
+        xs, ys = point.re * point.re, point.im * point.im
+        if xs + ys >= R(4)
+            return i
+        end
+        point = Complex(
+            xs - ys + calculated_point.re,
+            - 2 * point.re * point.im + calculated_point.im
+        )
+    end
+    return maxiter
+end
 
 #= }}}=#
 

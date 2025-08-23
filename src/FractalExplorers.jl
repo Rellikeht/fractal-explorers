@@ -54,6 +54,7 @@ export
     DEFAULT_CALCULATION,
     mandelbrot_calculation,
     drunkenbrot_calculation,
+    tricorn_calculation,
     test1_mandelbrot_calculation,
     test2_mandelbrot_calculation,
     test3_mandelbrot_calculation,
