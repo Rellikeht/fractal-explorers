@@ -21,7 +21,7 @@ const DEFAULT_ZOOM_FACTOR = 1.2
 const ZOOM_ACTION = :scrollzoom
 const DRAG_ACTION = :dragmove
 const RESET_ACTION = :reset
-const FRACTAL_ACTION = :fractal
+const NAME_ACTION = :name
 
 #= }}}=#
 
