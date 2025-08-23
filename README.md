@@ -17,5 +17,6 @@ Things created by accident:
 
 Animations:
 
-![spiral](animations/spiral.mp4)
-![branch](animations/branch.mp4)
+https://github.com/user-attachments/assets/915769b0-f670-4992-a500-05f16a2ac472
+
+https://github.com/user-attachments/assets/223200a6-ff3d-4fa6-aa8c-ffb36dcc5f8a
