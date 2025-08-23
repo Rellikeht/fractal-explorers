@@ -162,38 +162,26 @@ end
 #= drunkenbrot {{{=#
 
 function drunkenbrot_calculation(
-    calculated_point::Complex,
+    start_point::Complex,
     maxiter::Integer,
-    params::NamedTuple,
+    params::Union{<:NamedTuple,Nothing}=nothing,
 )
     drunkenbrot_calculation(
-        calculated_point,
+        start_point,
         maxiter,
-        hasproperty(params, :start) ? params.start : nothing
+        hasproperty(params, :start) ? params.start : typeof(start_point)(0, 0)
     )
 end
 
 function drunkenbrot_calculation(
-    calculated_point::Complex,
-    maxiter::Integer,
-    _::Nothing,
-)
-    drunkenbrot_calculation(
-        calculated_point,
-        maxiter,
-        typeof(calculated_point)(0, 0)
-    )
-end
-
-function drunkenbrot_calculation(
-    calculated_point::Complex,
+    start_point::Complex,
     maxiter::Integer,
     start::Number,
 )
     drunkenbrot_calculation(
-        calculated_point,
+        start_point,
         maxiter,
-        typeof(calculated_point)(start)
+        typeof(start_point)(start)
     )
 end
 

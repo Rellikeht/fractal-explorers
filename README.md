@@ -13,3 +13,9 @@ Typical stuff:
 Things created by accident:
 
 ![drunkenbrot](images/drunkenbrot.png)
+![badman](images/badman.png)
+
+Animations:
+
+![spiral](animations/spiral.mp4)
+![branch](animations/branch.mp4)
